@@ -86,10 +86,11 @@ public strictfp class RobotPlayer {
                 // Generate a random direction
                 Direction towardsArchon = new Direction((float)Math.atan((archonLoc.x-rc.getLocation().x)/(archonLoc.y-rc.getLocation().y)));
                 // Randomly attempt to build a soldier or lumberjack in this direction
-                if (rc.canBuildRobot(RobotType.SOLDIER, towardsArchon.opposite()) && Math.random() < 1) {
+                if (rc.canBuildRobot(RobotType.SOLDIER, randomDirection())) {
                     rc.buildRobot(RobotType.SOLDIER, towardsArchon.opposite());
-                } else if (rc.canBuildRobot(RobotType.LUMBERJACK, towardsArchon.opposite()) && Math.random() < .5 && rc.isBuildReady()) {
-                    rc.buildRobot(RobotType.LUMBERJACK, towardsArchon.opposite());
+                }
+                if (rc.canBuildRobot(RobotType.LUMBERJACK, towardsArchon.opposite()) && Math.random() < .5 && rc.isBuildReady()) {
+                   rc.buildRobot(RobotType.LUMBERJACK, towardsArchon.opposite());
                 }
                 
                 // Move randomly
@@ -104,7 +105,7 @@ public strictfp class RobotPlayer {
                 	rc.plantTree(dir);
                 }
                 TreeInfo[] trees = rc.senseNearbyTrees();
-                if(rc.canWater()) {
+                if(rc.canWater() && Math.random() < 0.3) {
                 	rc.water(trees[0].location);
                 	//rc.shake(trees[0].location);
                 	/*if(rc.getTeamBullets() > 100.0) {
