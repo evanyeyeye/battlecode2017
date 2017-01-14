@@ -22,7 +22,8 @@ public class Archon extends RobotPlayer {
                     }
                 }
                 
-                tryMove(randomDirection());
+                if(Math.random() < 0.05)
+                    tryMove(randomDirection());
 
                 // Broadcast archon's location for other robots on the team to know
                 MapLocation myLocation = rc.getLocation();
