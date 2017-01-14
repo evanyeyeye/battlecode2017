@@ -6,7 +6,14 @@ public class Gardener extends RobotPlayer {
     public static void run(RobotController rc) {
         RobotPlayer.rc = rc;
         initDirList();
-
+        
+        try {
+        	rc.broadcast(3,  rc.readBroadcast(3) + 1);
+        } catch (Exception e) {
+            System.out.println("Gardener Exception");
+            e.printStackTrace();
+        }
+        
         System.out.println("I'm a gardener!");
 
         // The code you want your robot to perform every round should be in this loop

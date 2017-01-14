@@ -4,8 +4,11 @@ import battlecode.common.*;
 public strictfp class RobotPlayer {
 	
     static RobotController rc;
-    static Direction[] dirList = new Direction[8];
+    
+    static MapLocation[] initialEnemyArchonLocations = rc.getInitialArchonLocations(rc.getTeam().opponent());
+    
     static MapLocation archonLoc;
+    static Direction[] dirList = new Direction[8];
     
     @SuppressWarnings("unused")
     public static void run(RobotController rc) throws GameActionException {
