@@ -2,6 +2,7 @@ package draft_1;
 import battlecode.common.*;
 
 public strictfp class RobotPlayer {
+	
     static RobotController rc;
     static Direction[] dirList = new Direction[8];
     static MapLocation archonLoc;
@@ -30,6 +31,9 @@ public strictfp class RobotPlayer {
         }
 	}
     
+    /**
+     * Initializes list of every pi/4 radian directions 
+     */ 
     public static void initDirList() {
     	for (int i=0; i<dirList.length; i++) {
     		float radians = (float)(-Math.PI + 2*Math.PI*((float)i)/dirList.length);

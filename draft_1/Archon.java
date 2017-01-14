@@ -2,14 +2,18 @@ package draft_1;
 import battlecode.common.*;
 
 public class Archon extends RobotPlayer {
-
+	
     public static void run(RobotController rc) throws GameActionException {
-        RobotPlayer.rc = rc;
+    	
+    	RobotPlayer.rc = rc;
         initDirList();
-
+        
+        rc.broadcast(0, binarySearchMapSize("x"));
+        rc.broadcast(1, binarySearchMapSize("y"));
+        
         System.out.println("Archon Spawn: " + rc.getID());
+        
         while (true) {
-
             try {
                 
                 // build gardeners
@@ -27,8 +31,8 @@ public class Archon extends RobotPlayer {
 
                 // Broadcast archon's location for other robots on the team to know
                 MapLocation myLocation = rc.getLocation();
-                rc.broadcast(0,(int)myLocation.x);
-                rc.broadcast(1,(int)myLocation.y);
+                rc.broadcast(2,(int)myLocation.x);
+                rc.broadcast(3,(int)myLocation.y);
 
                 // Clock.yield() makes the robot wait until the next turn, then it will perform this loop again
                 Clock.yield();
@@ -39,5 +43,10 @@ public class Archon extends RobotPlayer {
             }
         }
 
+    }
+    
+    public static int binarySearchMapSize (String axis) {
+    	
+    	
     }
 }
