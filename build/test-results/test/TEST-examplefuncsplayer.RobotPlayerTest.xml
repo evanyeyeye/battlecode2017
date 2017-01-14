@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="examplefuncsplayer.RobotPlayerTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2017-01-13T04:33:50" hostname="WMacBookPro.local" time="0.001">
+<testsuite name="examplefuncsplayer.RobotPlayerTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2017-01-14T01:06:24" hostname="EvanDesktop" time="0.0">
   <properties/>
-  <testcase name="testSanity" classname="examplefuncsplayer.RobotPlayerTest" time="0.001"/>
+  <testcase name="testSanity" classname="examplefuncsplayer.RobotPlayerTest" time="0.0"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

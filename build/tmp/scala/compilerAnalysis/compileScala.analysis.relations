@@ -1,12 +1,12 @@
 products:
-   src/test/RobotPlayer.java -> build/classes/test/RobotPlayer$1.class
-   src/test/RobotPlayer.java -> build/classes/test/RobotPlayer.class
+   C:\Users\Evan\Desktop\battlecode2017\src\test\RobotPlayer.java -> C:\Users\Evan\Desktop\battlecode2017\build\classes\test\RobotPlayer$1.class
+   C:\Users\Evan\Desktop\battlecode2017\src\test\RobotPlayer.java -> C:\Users\Evan\Desktop\battlecode2017\build\classes\test\RobotPlayer.class
 binary dependencies:
-   src/test/RobotPlayer.java -> /Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home/jre/lib/rt.jar
-   src/test/RobotPlayer.java -> /Users/williamzhang/.gradle/caches/modules-2/files-2.1/org.battlecode/battlecode/2017.1.1.7/2774a68c814157c7b688846c22bf8a4d6f065ae4/battlecode-2017.1.1.7.jar
+   C:\Users\Evan\Desktop\battlecode2017\src\test\RobotPlayer.java -> C:\Program Files\Java\jdk1.8.0_111\jre\lib\rt.jar
+   C:\Users\Evan\Desktop\battlecode2017\src\test\RobotPlayer.java -> C:\Users\Evan\.gradle\caches\modules-2\files-2.1\org.battlecode\battlecode\2017.1.2.2\ab392c0671ba645dbb8ee1ba49dfd119dc63bd54\battlecode-2017.1.2.2.jar
 source dependencies:
-   src/test/RobotPlayer.java -> src/test/RobotPlayer.java
+   C:\Users\Evan\Desktop\battlecode2017\src\test\RobotPlayer.java -> C:\Users\Evan\Desktop\battlecode2017\src\test\RobotPlayer.java
 external dependencies:
 class names:
-   src/test/RobotPlayer.java -> test.RobotPlayer
-   src/test/RobotPlayer.java -> test.RobotPlayer$1
+   C:\Users\Evan\Desktop\battlecode2017\src\test\RobotPlayer.java -> test.RobotPlayer
+   C:\Users\Evan\Desktop\battlecode2017\src\test\RobotPlayer.java -> test.RobotPlayer$1
