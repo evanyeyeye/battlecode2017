@@ -14,7 +14,7 @@ public class Archon extends RobotPlayer {
             try {
                 
                 // build gardeners
-                if ((rc.getRobotCount() == initialEnemyArchonLocations.length || rc.readBroadcast(3) < rc.getRobotCount() / 5) && rc.hasRobotBuildRequirements(RobotType.GARDENER)) {
+                if ((rc.getRobotCount() == rc.getInitialArchonLocations(rc.getTeam().opponent()).length || rc.readBroadcast(3) < rc.getRobotCount() / 3) && rc.hasRobotBuildRequirements(RobotType.GARDENER)) {
                     for (int i=0; i<dirList.length; i++) {
                         if (rc.canHireGardener(dirList[i])) {
                             rc.hireGardener(dirList[i]);

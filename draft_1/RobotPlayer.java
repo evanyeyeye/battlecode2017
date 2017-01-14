@@ -5,7 +5,7 @@ public strictfp class RobotPlayer {
 	
     static RobotController rc;
     
-    static MapLocation[] initialEnemyArchonLocations = rc.getInitialArchonLocations(rc.getTeam().opponent());
+    static MapLocation[] initialEnemyArchonLocations; 
     
     static MapLocation archonLoc;
     static Direction[] dirList = new Direction[8];
