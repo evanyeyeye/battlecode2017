@@ -57,7 +57,7 @@ public class Broadcast {
         if(ticket == 0) {
             for(int i : ID_REQUESTS) {
                 if(i == 0) {
-                    rc.broadcast(i, 1);
+                    rc.readBroadcast(i, 1);
                     // Establish ticket
                     return i;
                 }
