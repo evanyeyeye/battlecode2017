@@ -8,10 +8,6 @@ public class Archon extends RobotPlayer {
 
     static MapLocation[] corners = new MapLocation[4];
 
-    // Currently only indices 500-999 are used, but we allocate all 1000
-    // spaces for math simplicity
-    static int[] robots = new int[1000];
-
     static HashSet<Integer> unusedIDs = new HashSet<Integer>();
     static HashSet<Integer>   usedIDs = new HashSet<Integer>();
     static void fulfillIDRequests() throws GameActionException {
@@ -36,12 +32,6 @@ public class Archon extends RobotPlayer {
 
     static boolean allocate(int slot, int information) throws GameActionException {
         if(dynamicIDs_allocated.contains(slot)) {
-            return false;
-        }
-        if(slot >= 1000 || slot < 0) {
-            for(int i=0;i<1000;i++) {
-                System.out.println("INVALID SLOT CALLED IN ALLOCATE: " + slot);
-            }
             return false;
         }
         rc.broadcast(slot, information);
