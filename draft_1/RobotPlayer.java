@@ -165,6 +165,8 @@ class Broadcast {
 
     public static void alertArchon(MapLocation ml) throws GameActionException {
 
+        System.out.println("Alerting archon of belligerent at: " + ml.x + " " + ml.y);
+
         int age;
         int min_age = 9999;
         int min_index = 0;
