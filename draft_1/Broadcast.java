@@ -56,8 +56,8 @@ public class Broadcast {
     public static int requestID(int ticket) throws GameActionException {
         if(ticket == 0) {
             for(int i : ID_REQUESTS) {
-                if(i == 0) {
-                    rc.readBroadcast(i, 1);
+                if(rc.readBroadcast(i) == 0) {
+                    rc.broadcast(i, 1);
                     // Establish ticket
                     return i;
                 }
