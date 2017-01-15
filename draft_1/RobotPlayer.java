@@ -12,6 +12,7 @@ public strictfp class RobotPlayer {
     
     @SuppressWarnings("unused")
     public static void run(RobotController rc) throws GameActionException {
+        Broadcast.initBroadcaster(rc);
         switch (rc.getType()) {
             case ARCHON:
                 Archon.run(rc);
@@ -132,4 +133,53 @@ public strictfp class RobotPlayer {
 
         return (perpendicularDist <= rc.getType().bodyRadius);
     }
+}
+
+class Broadcast {
+
+    // Array real estate allocation
+
+    static RobotController rc;
+
+    public static int MAP_DIMENSIONS[]      = {0,1};
+
+    // Each robot takes 3 indeces: [age, x, y]
+    public static int ARCHON_AVOID_ROBOTS[] = {100, 103, 106, 109, 112, 115, 118, 121, 124, 127};
+
+    public static void initBroadcaster(RobotController r) {
+        rc = r;
+    }
+
+    static void broadcastLocation(int index, float x, float y) throws GameActionException {
+        int x_i = Float.floatToRawIntBits(x);
+        int y_i = Float.floatToRawIntBits(y);
+
+        // Set age to 0
+        rc.broadcast(index, 0);
+        rc.broadcast(index+1, x_i);
+        rc.broadcast(index+2, y_i);
+    }
+
+    public static void alertArchon(MapLocation ml) throws GameActionException {
+
+        System.out.println("Alerting archon of belligerent at: " + ml.x + " " + ml.y);
+
+        int age;
+        int min_age = 9999;
+        int min_index = 0;
+        for(int i : ARCHON_AVOID_ROBOTS) {
+            age = rc.readBroadcast(i);
+            if(age == 0) {
+                broadcastLocation(i, ml.x, ml.y);
+                return;
+            }
+            if(age < min_age) {
+                min_age = age;
+                min_index = i;
+            }
+        }
+        broadcastLocation(min_index, ml.x, ml.y);
+
+    }
+
 }
