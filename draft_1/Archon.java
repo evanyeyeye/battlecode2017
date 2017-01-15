@@ -8,7 +8,7 @@ public class Archon extends RobotPlayer {
 
     static MapLocation[] corners = new MapLocation[4];
 
-    // Currently only indeces 500-999 are used, but we allocate all 1000
+    // Currently only indices 500-999 are used, but we allocate all 1000
     // spaces for math simplicity
     static int[] robots = new int[1000];
 

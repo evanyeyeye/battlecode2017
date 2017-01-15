@@ -33,15 +33,16 @@ public class Gardener extends RobotPlayer {
                     rc.buildRobot(RobotType.SOLDIER, towardsArchon.opposite());
                 }
                 
+                /*
                 if (rc.hasRobotBuildRequirements(RobotType.SCOUT) && rc.canBuildRobot(RobotType.SCOUT, towardsArchon.opposite()) && !hasSpawnedScout) {
                     rc.buildRobot(RobotType.SCOUT, towardsArchon.opposite());
                     hasSpawnedScout = true;
-                }
+                } */
                 
                 // Move randomly
-                if(!tryMove(towardsArchon)) {
+                //if(!tryMove(towardsArchon)) {
                     tryMove(randomDirection());
-                }
+                //}
 
                 Direction dir = randomDirection();
                 if(rc.canPlantTree(dir) && Math.random() < 0.2) {
