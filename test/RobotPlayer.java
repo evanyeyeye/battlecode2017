@@ -48,10 +48,10 @@ public strictfp class RobotPlayer {
                 Direction dir = randomDirection();
 
                 // Randomly attempt to build a gardener in this direction
-                if(rc.canHireGardener(dir) && !hasHiredGardener) {
+                if(rc.hasRobotBuildRequirements(RobotType.GARDENER) && rc.canHireGardener(dir) && !hasHiredGardener) {
                 	rc.hireGardener(dir);
                 	hasHiredGardener = true;
-                } else if (rc.canHireGardener(dir) && Math.random() < .5) {
+                } else if (rc.hasRobotBuildRequirements(RobotType.GARDENER) && rc.canHireGardener(dir) && Math.random() < .5) {
                     rc.hireGardener(dir);
                 }
 
@@ -97,10 +97,10 @@ public strictfp class RobotPlayer {
                 // Generate a random direction
                 Direction towardsArchon = new Direction((float)Math.atan((archonLoc.x-rc.getLocation().x)/(archonLoc.y-rc.getLocation().y)));
                 // Randomly attempt to build a soldier or lumberjack in this direction
-                if (rc.canBuildRobot(RobotType.SOLDIER, randomDirection()) && Math.random() < .8) {
+                if (rc.hasRobotBuildRequirements(RobotType.SOLDIER) && rc.canBuildRobot(RobotType.SOLDIER, towardsArchon.opposite()) && Math.random() < .8) {
                     rc.buildRobot(RobotType.SOLDIER, towardsArchon.opposite());
                 }
-                if (rc.canBuildRobot(RobotType.LUMBERJACK, towardsArchon.opposite()) && Math.random() < .1 && rc.isBuildReady()) {
+                if (rc.hasRobotBuildRequirements(RobotType.LUMBERJACK) && rc.canBuildRobot(RobotType.LUMBERJACK, towardsArchon.opposite()) && Math.random() < .1 && rc.isBuildReady()) {
                    rc.buildRobot(RobotType.LUMBERJACK, towardsArchon.opposite());
                 }
                 
@@ -113,15 +113,15 @@ public strictfp class RobotPlayer {
                 }*/
                 Direction dir = randomDirection();
                 if(rc.canPlantTree(dir) && Math.random() < 0.2) {
-                	rc.plantTree(dir);
+                    rc.plantTree(dir);
                 }
                 TreeInfo[] trees = rc.senseNearbyTrees();
-                if(rc.canWater() && Math.random() < 0.3) {
-                	rc.water(trees[0].location);
-                	//rc.shake(trees[0].location);
-                	/*if(rc.getTeamBullets() > 100.0) {
-                		rc.donate((float) 10.0);
-                	}*/
+                if(trees.length > 0 && rc.canWater(trees[0].location) && Math.random() < 0.3) {
+                    rc.water(trees[0].location);
+                    //rc.shake(trees[0].location);
+                    /*if(rc.getTeamBullets() > 100.0) {
+                        rc.donate((float) 10.0);
+                    }*/
                 }
                 // Clock.yield() makes the robot wait until the next turn, then it will perform this loop again
                 Clock.yield();
@@ -222,11 +222,12 @@ public strictfp class RobotPlayer {
                     }
 
                 }
-                if (trees.length > 0) {
+                if (trees.length > 0 && !rc.hasAttacked()) {
                 	for(int i = 0; i < trees.length; i++) {
                 		Direction towardsTree = new Direction((float) Math.atan((trees[i].location.x-rc.getLocation().x)/(trees[i].location.y-rc.getLocation().y)));
                 		tryMove(towardsTree);
-                		rc.chop(trees[i].location);
+                		if (rc.canChop(trees[i].location))
+                			rc.chop(trees[i].location);
                 	}
                 } else {
                 	tryMove(randomDirection());
@@ -271,6 +272,9 @@ public strictfp class RobotPlayer {
      */
     static boolean tryMove(Direction dir, float degreeOffset, int checksPerSide) throws GameActionException {
 
+    	if (rc.hasMoved())
+    		return false;
+    	
         // First, try intended direction
         if (rc.canMove(dir)) {
             rc.move(dir);
