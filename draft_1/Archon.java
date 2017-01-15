@@ -50,7 +50,10 @@ public class Archon extends RobotPlayer {
         while (true) {
             try {
 
-                fulfillIDRequests();
+                main_archon = main_archon || Broadcast.checkMainArchon();
+                if(main_archon) {
+                    fulfillIDRequests();
+                }
 
                 // build gardeners
                 if ((rc.getRobotCount() == rc.getInitialArchonLocations(rc.getTeam().opponent()).length || rc.readBroadcast(3) < rc.getRobotCount() / 3) && rc.hasRobotBuildRequirements(RobotType.GARDENER)) {
