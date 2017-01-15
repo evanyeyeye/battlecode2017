@@ -3,7 +3,7 @@ import battlecode.common.*;
 
 public class Archon extends RobotPlayer {
 	
-    MapLocation corners[4];
+    MapLocation[] corners = new MapLocation[4];
 
     public static void run(RobotController rc) throws GameActionException {
     	
@@ -26,19 +26,19 @@ public class Archon extends RobotPlayer {
                 }
                 MapLocation archonLocation = rc.getLocation();
 
-                MapLocation enemyLocations[10];
+                MapLocation[] enemyLocations = new MapLocation[10];
                 int currentLocationIndex = 0;
 
-                float x = 0.0;
-                float y = 0.0;
+                float x = 0.0f;
+                float y = 0.0f;
                 int age = 0;
                 for(int i : Broadcast.ARCHON_AVOID_ROBOTS) {
-                    age = readBroadcast(i);
+                    age = rc.readBroadcast(i);
                     if(age <= 0) continue;
 
-                    x = Float.longBitsToFloat(readBroadcast(i+1));
-                    y = Float.longBitsToFloat(readBroadcast(i+2));
-                    broadcast(i, age+1);
+                    x = Float.intBitsToFloat(rc.readBroadcast(i+1));
+                    y = Float.intBitsToFloat(rc.readBroadcast(i+2));
+                    rc.broadcast(i, age+1);
 
                     enemyLocations[currentLocationIndex++] = new MapLocation(x,y);
                 }
@@ -52,8 +52,8 @@ public class Archon extends RobotPlayer {
                     tryMove(randomDirection());
 
                 // Broadcast archon's location for other robots on the team to know
-                rc.broadcast(0,(int)myLocation.x);
-                rc.broadcast(1,(int)myLocation.y);
+                rc.broadcast(0,(int)archonLocation.x);
+                rc.broadcast(1,(int)archonLocation.y);
 
                 // Clock.yield() makes the robot wait until the next turn, then it will perform this loop again
                 Clock.yield();
