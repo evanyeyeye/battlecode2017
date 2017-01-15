@@ -3,6 +3,8 @@ import battlecode.common.*;
 
 public class Archon extends RobotPlayer {
 	
+    MapLocation corners[4];
+
     public static void run(RobotController rc) throws GameActionException {
     	
     	RobotPlayer.rc = rc;
@@ -22,12 +24,34 @@ public class Archon extends RobotPlayer {
                         }
                     }
                 }
+                MapLocation archonLocation = rc.getLocation();
+
+                MapLocation enemyLocations[10];
+                int currentLocationIndex = 0;
+
+                float x = 0.0;
+                float y = 0.0;
+                int age = 0;
+                for(int i : Broadcast.ARCHON_AVOID_ROBOTS) {
+                    age = readBroadcast(i);
+                    if(age <= 0) continue;
+
+                    x = Float.longBitsToFloat(readBroadcast(i+1));
+                    y = Float.longBitsToFloat(readBroadcast(i+2));
+                    broadcast(i, age+1);
+
+                    enemyLocations[currentLocationIndex++] = new MapLocation(x,y);
+                }
+
+                if(currentLocationIndex != 0) {
+                    // Figure out closest belligerent
+                    // Move away
+                }
                 
                 if(Math.random() < 0.05)
                     tryMove(randomDirection());
 
                 // Broadcast archon's location for other robots on the team to know
-                MapLocation myLocation = rc.getLocation();
                 rc.broadcast(0,(int)myLocation.x);
                 rc.broadcast(1,(int)myLocation.y);
 
