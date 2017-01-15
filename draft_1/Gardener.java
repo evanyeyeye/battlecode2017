@@ -16,7 +16,8 @@ public class Gardener extends RobotPlayer {
         }
         
         System.out.println("Gardener Spawn: " + rc.getID());
-
+        boolean hasSpawnedScout = false;
+        
         while (true) {
 
             try {
@@ -29,6 +30,10 @@ public class Gardener extends RobotPlayer {
                 // Randomly attempt to build a soldier or lumberjack in this direction
                 if (rc.hasRobotBuildRequirements(RobotType.SOLDIER) && rc.canBuildRobot(RobotType.SOLDIER, towardsArchon.opposite())) {
                     rc.buildRobot(RobotType.SOLDIER, towardsArchon.opposite());
+                }
+                if (rc.hasRobotBuildRequirements(RobotType.SCOUT) && rc.canBuildRobot(RobotType.SCOUT, towardsArchon.opposite()) && !hasSpawnedScout) {
+                    rc.buildRobot(RobotType.SCOUT, towardsArchon.opposite());
+                    hasSpawnedScout = true;
                 }
                 
                 // Move randomly

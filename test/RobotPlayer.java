@@ -33,10 +33,11 @@ public strictfp class RobotPlayer {
         }
 	}
     static MapLocation archonLoc;
+    static int counter = 0;
     
     static void runArchon() throws GameActionException {
         System.out.println("I'm an archon!");
-
+        boolean hasHiredGardener = false;
         // The code you want your robot to perform every round should be in this loop
         while (true) {
  
@@ -47,7 +48,10 @@ public strictfp class RobotPlayer {
                 Direction dir = randomDirection();
 
                 // Randomly attempt to build a gardener in this direction
-                if (rc.canHireGardener(dir) && Math.random() < .5) {
+                if(rc.canHireGardener(dir) && !hasHiredGardener) {
+                	rc.hireGardener(dir);
+                	hasHiredGardener = true;
+                } else if (rc.canHireGardener(dir) && Math.random() < .5) {
                     rc.hireGardener(dir);
                 }
 
@@ -58,7 +62,14 @@ public strictfp class RobotPlayer {
                 MapLocation myLocation = rc.getLocation();
                 rc.broadcast(0,(int)myLocation.x);
                 rc.broadcast(1,(int)myLocation.y);
-
+                if(rc.getTeamBullets() > 200.0) {
+                	if(counter == 10) {
+                		rc.donate((float) 10.0);
+                		counter = 0;
+                	} else {
+                		counter++;
+                	}
+        		}
                 // Clock.yield() makes the robot wait until the next turn, then it will perform this loop again
                 Clock.yield();
 
@@ -86,10 +97,10 @@ public strictfp class RobotPlayer {
                 // Generate a random direction
                 Direction towardsArchon = new Direction((float)Math.atan((archonLoc.x-rc.getLocation().x)/(archonLoc.y-rc.getLocation().y)));
                 // Randomly attempt to build a soldier or lumberjack in this direction
-                if (rc.canBuildRobot(RobotType.SOLDIER, randomDirection())) {
+                if (rc.canBuildRobot(RobotType.SOLDIER, randomDirection()) && Math.random() < .8) {
                     rc.buildRobot(RobotType.SOLDIER, towardsArchon.opposite());
                 }
-                if (rc.canBuildRobot(RobotType.LUMBERJACK, towardsArchon.opposite()) && Math.random() < .5 && rc.isBuildReady()) {
+                if (rc.canBuildRobot(RobotType.LUMBERJACK, towardsArchon.opposite()) && Math.random() < .1 && rc.isBuildReady()) {
                    rc.buildRobot(RobotType.LUMBERJACK, towardsArchon.opposite());
                 }
                 
