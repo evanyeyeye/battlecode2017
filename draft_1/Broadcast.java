@@ -13,7 +13,9 @@ public class Broadcast {
      * BEGIN INDEX ALLOCATION
      */
 
-    public static int MAP_DIMENSIONS[]          = {0, 1};
+    public static int MAIN_ARCHON_POSITION[]    = {0, 1};
+    public static int ARCHON_POSITIONS[]        = {0, 1, 2, 3, 4, 5};
+    public static int MAIN_ARCHON_IN_DISTRESS   = 6;
     public static int REINFORCEMENTS_REQUESTS[] = {200, 203, 206, 209};
 
     // Each robot takes 3 indices: [age, x, y]
@@ -39,6 +41,11 @@ public class Broadcast {
 
     public static void initBroadcaster(RobotController r) {
         rc = r;
+    }
+
+    public static boolean checkMainArchonDistress() throws GameActionException {
+        int status = rc.readBroadcast(MAIN_ARCHON_IN_DISTRESS);
+        return status != 0;
     }
 
     public static boolean checkMainArchon() throws GameActionException {
@@ -86,11 +93,11 @@ public class Broadcast {
      * Location codes: dynamically allocated codes
      *  -- negative indicates move away from
      */
-    static boolean isLocationCode(int code) {
+    static boolean isDynamicChannelCode(int code) {
         int acode = Math.abs(code)%locationCodeStatusFactor;
         return acode >= 400000 && acode < 490000;
     }
-    static int[] readLocationCode(int code) {
+    static int[] readDynamicChannelCode2(int code) {
         int t = code%locationCodeStatusFactor;
         int[] deconst = {t%1000, t/1000, code/locationCodeStatusFactor};
         return deconst;

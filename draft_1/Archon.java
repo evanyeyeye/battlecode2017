@@ -55,7 +55,7 @@ public class Archon extends RobotPlayer {
         int num_requests = 0;
         for(int i=0;i<reinforcements_slots.length;i++) {
             if(reinforcements_slots[i] != 0) {
-                int[] t = Broadcast.readLocationCode(reinforcements_slots[i]);
+                int[] t = Broadcast.readDynamicChannelCode2(reinforcements_slots[i]);
                 int x = t[0];
                 int y = t[1];
                 deallocate(x);
@@ -127,6 +127,9 @@ public class Archon extends RobotPlayer {
         while (true) {
             try {
 
+                // if Archon has taken damage
+                // rc.broadcast(Broadcast.ARCHON_IN_DISTRESS, 1);
+
                 main_archon = main_archon || Broadcast.checkMainArchon();
                 if(main_archon) {
                     fulfillIDRequests();
@@ -176,9 +179,19 @@ public class Archon extends RobotPlayer {
                     tryMove(randomDirection());
 
                 // Broadcast archon's location for other robots on the team to know
-                MapLocation myLocation = rc.getLocation();
-                rc.broadcast(0,(int)myLocation.x);
-                rc.broadcast(1,(int)myLocation.y);
+                if(main_archon) {
+                    rc.broadcast(0,Float.floatToRawIntBits(archonLocation.x));
+                    rc.broadcast(1,Float.floatToRawIntBits(archonLocation.y));
+                } else {
+                    int main_archon_x = rc.readBroadcast(0);
+                    if(main_archon_x != 0) {
+                        // Group up Archons
+                        int main_archon_y = rc.readBroadcast(1);
+                        tryMove(archonLocation.directionTo(
+                                    new MapLocation(Float.intBitsToFloat(main_archon_x),
+                                        Float.intBitsToFloat(main_archon_y))));
+                    }
+                }
 
                 Clock.yield();
 

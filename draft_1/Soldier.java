@@ -38,23 +38,40 @@ public class Soldier extends RobotPlayer {
             // Try/catch blocks stop unhandled exceptions, which cause your robot to explode
             try {
 
+
+                float archon_x = Float.intBitsToFloat(rc.readBroadcast(
+                            Broadcast.MAIN_ARCHON_POSITION[0]));
+                float archon_y = Float.intBitsToFloat(rc.readBroadcast(
+                            Broadcast.MAIN_ARCHON_POSITION[1]));
+
+                MapLocation myLocation = rc.getLocation();
+
+                MapLocation archonLocation = new MapLocation(archon_x, archon_y);
+                if(Broadcast.checkMainArchonDistress()) {
+                    tryMove(myLocation.directionTo(archonLocation));
+                }
+
                 if(ID > 500) {
                     int code = rc.readBroadcast(ID);
-                    if(Broadcast.isLocationCode(code)) {
-                        int[] coordinates = Broadcast.readLocationCode(code);
+                    if(Broadcast.isDynamicChannelCode(code)) {
+                        int[] coordinates = Broadcast.readDynamicChannelCode2(code);
                         int x = rc.readBroadcast(coordinates[0]);
                         int y = rc.readBroadcast(coordinates[1]);
+                        float x_f = Float.intBitsToFloat(x);
+                        float y_f = Float.intBitsToFloat(y);
                         int type = coordinates[2];
                         switch(type) {
                             case REINFORCE:
-                                // System.out.println("Responding to reinforcement request");
-                                tryMove(rc.getLocation().directionTo(new MapLocation(x, y)));
+                                System.out.println("Responding to reinforcement request at: " + x_f +  " " + y_f);
+                                try {
+                                    tryMove(myLocation.directionTo(new MapLocation(x_f, y_f)));
+                                } catch(Exception e) {
+                                    System.out.println("TRIED TO MOVE TO: " + x_f + " " + y_f);
+                                }
                                 break;
                         }
                     }
                 }
-
-                MapLocation myLocation = rc.getLocation();
 
                 // See if there are any nearby enemy robots
                 RobotInfo[] robots = rc.senseNearbyRobots(-1, enemy);
