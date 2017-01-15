@@ -17,7 +17,7 @@ public class Broadcast {
     public static int MAP_DIMENSIONS[]          = {0, 1};
     public static int REINFORCEMENTS_REQUESTS[] = {200, 203, 206, 209};
 
-    // Each robot takes 3 indeces: [age, x, y]
+    // Each robot takes 3 indices: [age, x, y]
     public static int ARCHON_AVOID_ROBOTS[]     = {100, 103, 106, 109, 112, 115, 118, 121, 124, 127};
 
     public static int MAIN_ARCHON               = 99;

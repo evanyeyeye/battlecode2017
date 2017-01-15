@@ -2,14 +2,14 @@ package draft_1;
 import battlecode.common.*;
 
 public strictfp class RobotPlayer {
-	
+
     static RobotController rc;
-    
-    static MapLocation[] initialEnemyArchonLocations; 
-    
+
+    static MapLocation[] initialEnemyArchonLocations;
+
     static MapLocation archonLoc;
     static Direction[] dirList = new Direction[8];
-    
+
     @SuppressWarnings("unused")
     public static void run(RobotController rc) throws GameActionException {
         Broadcast.initBroadcaster(rc);
@@ -34,10 +34,10 @@ public strictfp class RobotPlayer {
                 break;
         }
 	}
-    
+
     /**
-     * Initializes list of every pi/4 radian directions 
-     */ 
+     * Initializes list of every pi/4 radian directions
+     */
     public static void initDirList() {
     	for (int i=0; i<dirList.length; i++)
     		dirList[i] = new Direction((float)(2 * Math.PI * ((float)i) / dirList.length));
@@ -72,7 +72,7 @@ public strictfp class RobotPlayer {
 
     	if (rc.hasMoved())
     		return false;
-    	
+
         // First, try intended direction
         if (rc.canMove(dir)) {
             rc.move(dir);
@@ -128,7 +128,7 @@ public strictfp class RobotPlayer {
         // This is the distance of a line that goes from myLocation and intersects perpendicularly with propagationDirection.
         // This corresponds to the smallest radius circle centered at our location that would intersect with the
         // line that is the path of the bullet.
-        float perpendicularDist = (float)Math.abs(distToRobot * Math.sin(theta)); 
+        float perpendicularDist = (float)Math.abs(distToRobot * Math.sin(theta));
 
         return (perpendicularDist <= rc.getType().bodyRadius);
     }

@@ -8,9 +8,9 @@ public class Scout extends RobotPlayer {
 		double[] count = new double[2];
 		count[0] = 0.0;
 		count[1] = 0.0;
-		
+
 		try {
-			
+
 			while(rc.onTheMap(rc.getLocation(), RobotType.SCOUT.sensorRadius)) {
 				if(tryMove(way)) {
 					count[0] += (Math.cos(way.radians) * RobotType.SCOUT.strideRadius);
@@ -18,20 +18,20 @@ public class Scout extends RobotPlayer {
 				}
 			}
 			System.out.println("I am at the edge");
-			
+
 		} catch (Exception e) {
 			System.out.println("This will never happen");
 		}
 		return count;
 	}
-	
+
     public static void run(RobotController rc) {
         RobotPlayer.rc = rc;
         initDirList();
-        
+
         System.out.println("I'm a scout!");
         Team enemy = rc.getTeam().opponent();
-        
+
         // The code you want your robot to perform every round should be in this loop
         while (true) {
 
@@ -45,7 +45,7 @@ public class Scout extends RobotPlayer {
                 	Direction towardsEnemy = new Direction((float) Math.atan((robots[1].location.x-rc.getLocation().x)/(robots[1].location.y-rc.getLocation().y)));
                     // Use strike() to hit all nearby robots!
                     rc.fireSingleShot(towardsEnemy);
-                
+
                 } else {
                     // No close robots, so search for robots within sight radius
                     robots = rc.senseNearbyRobots(-1,enemy);

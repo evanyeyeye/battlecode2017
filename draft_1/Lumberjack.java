@@ -9,7 +9,7 @@ public class Lumberjack extends RobotPlayer {
 
         System.out.println("I'm a lumberjack!");
         Team enemy = rc.getTeam().opponent();
-        
+
         // The code you want your robot to perform every round should be in this loop
         while (true) {
 
@@ -22,7 +22,7 @@ public class Lumberjack extends RobotPlayer {
                 if(robots.length > 0 && !rc.hasAttacked()) {
                     // Use strike() to hit all nearby robots!
                     rc.strike();
-                
+
                 } else {
                     // No close robots, so search for robots within sight radius
                     robots = rc.senseNearbyRobots(-1,enemy);
