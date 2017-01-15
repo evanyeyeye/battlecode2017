@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 public class Archon extends RobotPlayer {
-	
+
     static MapLocation[] corners = new MapLocation[4];
 
     // Currently only indeces 500-999 are used, but we allocate all 1000
@@ -37,16 +37,16 @@ public class Archon extends RobotPlayer {
 
 
     public static void run(RobotController rc) throws GameActionException {
-    	
+
     	RobotPlayer.rc = rc;
         initDirList();
-        
+
         System.out.println("Archon Spawn: " + rc.getID());
 
         for(int i = 500; i<1000; i++) {
             unusedIDs.add(i);
         }
-        
+
         while (true) {
             try {
 
@@ -93,7 +93,7 @@ public class Archon extends RobotPlayer {
                     System.out.println("Archon moving away from: " + closestEnemy.x + " " + closestEnemy.y);
                     tryMove(closestEnemy.directionTo(archonLocation));
                 };
-                
+
                 if(Math.random() < 0.05)
                     tryMove(randomDirection());
 
@@ -111,5 +111,5 @@ public class Archon extends RobotPlayer {
         }
 
     }
-    
+
 }
