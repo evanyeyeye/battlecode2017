@@ -12,7 +12,7 @@ public strictfp class RobotPlayer {
     
     @SuppressWarnings("unused")
     public static void run(RobotController rc) throws GameActionException {
-        Broadcast.init(rc);
+        Broadcast.initBroadcaster(rc);
         switch (rc.getType()) {
             case ARCHON:
                 Archon.run(rc);
@@ -149,7 +149,7 @@ class Broadcast {
     // Each robot takes 3 indeces: [age, x, y]
     public static int ARCHON_AVOID_ROBOTS[] = {100, 103, 106, 109, 112, 115, 118, 121, 124, 127};
 
-    static void init(RobotController r) {
+    public static void initBroadcaster(RobotController r) {
         rc = r;
     }
 
