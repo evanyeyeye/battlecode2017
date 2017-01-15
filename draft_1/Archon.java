@@ -30,8 +30,7 @@ public class Archon extends RobotPlayer {
                 MapLocation myLocation = rc.getLocation();
                 rc.broadcast(0,(int)myLocation.x);
                 rc.broadcast(1,(int)myLocation.y);
-
-                // Clock.yield() makes the robot wait until the next turn, then it will perform this loop again
+                
                 Clock.yield();
 
             } catch (Exception e) {

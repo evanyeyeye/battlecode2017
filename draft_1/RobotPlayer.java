@@ -38,17 +38,14 @@ public strictfp class RobotPlayer {
      * Initializes list of every pi/4 radian directions 
      */ 
     public static void initDirList() {
-    	for (int i=0; i<dirList.length; i++) {
-    		float radians = (float)(-Math.PI + 2*Math.PI*((float)i)/dirList.length);
-    		dirList[i] = new Direction(radians);
-    	}
+    	for (int i=0; i<dirList.length; i++)
+    		dirList[i] = new Direction((float)(2 * Math.PI * ((float)i) / dirList.length));
     }
 
     /**
-     * Returns a random Direction
      * @return a random Direction
      */
-    static Direction randomDirection() {
+    public static Direction randomDirection() {
         return new Direction((float)Math.random() * 2 * (float)Math.PI);
     }
 
@@ -59,21 +56,22 @@ public strictfp class RobotPlayer {
      * @return true if a move was performed
      * @throws GameActionException
      */
-    static boolean tryMove(Direction dir) throws GameActionException {
-        return tryMove(dir,20,3);
+    public static boolean tryMove(Direction dir) throws GameActionException {
+        return tryMove(dir, 20, 3);
     }
 
     /**
-     * Attempts to move in a given direction, while avoiding small obstacles direction in the path.
-     *
      * @param dir The intended direction of movement
      * @param degreeOffset Spacing between checked directions (degrees)
      * @param checksPerSide Number of extra directions checked on each side, if intended direction was unavailable
      * @return true if a move was performed
      * @throws GameActionException
      */
-    static boolean tryMove(Direction dir, float degreeOffset, int checksPerSide) throws GameActionException {
+    public static boolean tryMove(Direction dir, float degreeOffset, int checksPerSide) throws GameActionException {
 
+    	if (rc.hasMoved())
+    		return false;
+    	
         // First, try intended direction
         if (rc.canMove(dir)) {
             rc.move(dir);
@@ -84,7 +82,7 @@ public strictfp class RobotPlayer {
         boolean moved = false;
         int currentCheck = 1;
 
-        while(currentCheck<=checksPerSide) {
+        while (currentCheck <= checksPerSide) {
             // Try the offset of the left side
             if(rc.canMove(dir.rotateLeftDegrees(degreeOffset*currentCheck))) {
                 rc.move(dir.rotateLeftDegrees(degreeOffset*currentCheck));
@@ -99,7 +97,6 @@ public strictfp class RobotPlayer {
             currentCheck++;
         }
 
-        // A move never happened, so return false.
         return false;
     }
 
@@ -110,7 +107,7 @@ public strictfp class RobotPlayer {
      * @param bullet The bullet in question
      * @return True if the line of the bullet's path intersects with this robot's current position.
      */
-    static boolean willCollideWithMe(BulletInfo bullet) {
+    public static boolean willCollideWithMe(BulletInfo bullet) {
         MapLocation myLocation = rc.getLocation();
 
         // Get relevant bullet information
@@ -131,7 +128,7 @@ public strictfp class RobotPlayer {
         // This is the distance of a line that goes from myLocation and intersects perpendicularly with propagationDirection.
         // This corresponds to the smallest radius circle centered at our location that would intersect with the
         // line that is the path of the bullet.
-        float perpendicularDist = (float)Math.abs(distToRobot * Math.sin(theta)); // soh cah toa :)
+        float perpendicularDist = (float)Math.abs(distToRobot * Math.sin(theta)); 
 
         return (perpendicularDist <= rc.getType().bodyRadius);
     }
