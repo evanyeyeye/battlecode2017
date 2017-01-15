@@ -90,24 +90,24 @@ public class Broadcast {
         System.out.println("Requesting reinforcements at: " + ml.x + " " + ml.y);
 
         int age;
-        int min_age = Integer.MAX_VALUE;
-        int min_index = 0;
+        int max_age = 0;
+        int max_index = 0;
         for(int i : REINFORCEMENTS_REQUESTS) {
             age = rc.readBroadcast(i);
             if(age == 0) {
                 broadcastLocation(i, ml.x, ml.y);
                 return true;
             }
-            if(age < min_age) {
-                min_age = age;
-                min_index = i;
+            if(age > max_age) {
+                max_age = age;
+                max_index = i;
             }
         }
 
         // If all other requests are still being fulfilled,
         // it is a waste of time to constantly switch to new ones
-        if(min_age <= REINFORCEMENTS_FULFILL_TIME) return false;
-        broadcastLocation(min_index, ml.x, ml.y);
+        if(max_age <= REINFORCEMENTS_FULFILL_TIME) return false;
+        broadcastLocation(max_index, ml.x, ml.y);
         return true;
     }
 
@@ -116,20 +116,20 @@ public class Broadcast {
         System.out.println("Alerting archon of belligerent at: " + ml.x + " " + ml.y);
 
         int age;
-        int min_age = Integer.MAX_VALUE;
-        int min_index = 0;
+        int max_age = Integer.MAX_VALUE;
+        int max_index = 0;
         for(int i : ARCHON_AVOID_ROBOTS) {
             age = rc.readBroadcast(i);
             if(age == 0) {
                 broadcastLocation(i, ml.x, ml.y);
                 return;
             }
-            if(age < min_age) {
-                min_age = age;
-                min_index = i;
+            if(age > max_age) {
+                max_age = age;
+                max_index = i;
             }
         }
-        broadcastLocation(min_index, ml.x, ml.y);
+        broadcastLocation(max_index, ml.x, ml.y);
 
     }
 
