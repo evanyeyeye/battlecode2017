@@ -3,7 +3,12 @@ import battlecode.common.*;
 
 public class Soldier extends RobotPlayer {
 
-    public static void run(RobotController rc) {
+    static int ID = 0;
+    // 0 == Need ID
+    // [490,499] == ID request processing
+    // [500,999] == ID established
+
+    public static void run(RobotController rc) throws GameActionException {
         RobotPlayer.rc = rc;
         initDirList();
 
@@ -13,6 +18,10 @@ public class Soldier extends RobotPlayer {
 
         // The code you want your robot to perform every round should be in this loop
         while (true) {
+
+            if(ID < 500) {
+                ID = Broadcast.requestID(ID);
+            }
 
             // Try/catch blocks stop unhandled exceptions, which cause your robot to explode
             try {
