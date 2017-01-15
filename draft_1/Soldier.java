@@ -41,9 +41,10 @@ public class Soldier extends RobotPlayer {
                 if(ID > 500) {
                     int code = rc.readBroadcast(ID);
                     if(Broadcast.isLocationCode(code)) {
-                        int x = rc.readBroadcast((code%10000000)/1000);
-                        int y = rc.readBroadcast(code%1000);
-                        int type = code/10000000;
+                        int[] coordinates = Broadcast.readLocationCode(code);
+                        int x = rc.readBroadcast(coordinates[0]);
+                        int y = rc.readBroadcast(coordinates[1]);
+                        int type = coordinates[2];
                         switch(type) {
                             case REINFORCE:
                                 // System.out.println("Responding to reinforcement request");

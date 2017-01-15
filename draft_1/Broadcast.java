@@ -51,6 +51,12 @@ public class Broadcast {
 
     }
 
+    public static int genDynamicCode3(int first, int second, int third, int status) {
+        return first + 1000*second + 1000*1000*third + 1000*1000*1000*status;
+    }
+    public static int genDynamicCode2(int first, int second, int status) {
+        return first + 1000*second + 1000*1000*status;
+    }
 
     // Returns 0 if request has been ignored
     // Returns [490, 500) if request is placed
@@ -75,13 +81,19 @@ public class Broadcast {
         return ticket;
     }
 
+    static int locationCodeStatusFactor = 1000 * 1000;
     /*
      * Location codes: dynamically allocated codes
      *  -- negative indicates move away from
      */
     static boolean isLocationCode(int code) {
-        int acode = Math.abs(code)%10000000;
+        int acode = Math.abs(code)%locationCodeStatusFactor;
         return acode >= 400000 && acode < 490000;
+    }
+    static int[] readLocationCode(int code) {
+        int t = code%locationCodeStatusFactor;
+        int[] deconst = {t%1000, t/1000, code/locationCodeStatusFactor};
+        return deconst;
     }
 
     public static void broadcastLocation(int index, float x, float y) throws GameActionException {

@@ -55,9 +55,9 @@ public class Archon extends RobotPlayer {
         int num_requests = 0;
         for(int i=0;i<reinforcements_slots.length;i++) {
             if(reinforcements_slots[i] != 0) {
-                int t = reinforcements_slots[i]%10000000;
-                int x = t/1000;
-                int y = t%1000;
+                int[] t = Broadcast.readLocationCode(reinforcements_slots[i]);
+                int x = t[0];
+                int y = t[1];
                 deallocate(x);
                 deallocate(y);
                 reinforcements_slots[i] = 0;
@@ -87,7 +87,7 @@ public class Archon extends RobotPlayer {
             allocate(slot_x, rc.readBroadcast(i+1));
             allocate(slot_y, rc.readBroadcast(i+2));
 
-            reinforcements_slots[num_requests++] = 1000*slot_x + slot_y + 10000000 * Soldier.REINFORCE;
+            reinforcements_slots[num_requests++] = Broadcast.genDynamicCode2(slot_x, slot_y, Soldier.REINFORCE);
         }
 
         if(num_requests == 0) return;
