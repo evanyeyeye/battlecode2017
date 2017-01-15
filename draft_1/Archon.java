@@ -34,11 +34,6 @@ public class Archon extends RobotPlayer {
     static HashSet<Integer> dynamicIDs_unallocated = new HashSet<Integer>();
     static HashSet<Integer> dynamicIDs_allocated   = new HashSet<Integer>();
 
-
-    static int getDynamicSlot() {
-        if(dynamicIDs_unallocated.isEmpty()) return -1;
-        return dynamicIDs_unallocated.iterator().next();
-    }
     static boolean allocate(int slot, int information) throws GameActionException {
         if(dynamicIDs_allocated.contains(slot)) {
             return false;
@@ -70,7 +65,11 @@ public class Archon extends RobotPlayer {
         int num_requests = 0;
         for(int i=0;i<reinforcements_slots.length;i++) {
             if(reinforcements_slots[i] != 0) {
-                deallocate(reinforcements_slots[i]);
+                int t = reinforcements_slots[i]%10000000;
+                int x = t/1000;
+                int y = t%1000;
+                deallocate(x);
+                deallocate(y);
                 reinforcements_slots[i] = 0;
             }
         }
@@ -83,8 +82,15 @@ public class Archon extends RobotPlayer {
                 continue;
             }
 
-            int slot_x = getDynamicSlot();
-            int slot_y = getDynamicSlot();
+            if(dynamicIDs_unallocated.isEmpty()) continue;
+            Iterator<Integer> it = dynamicIDs_unallocated.iterator();
+            int slot_x = it.next();
+            int slot_y;
+            if(it.hasNext()) {
+                slot_y = it.next();
+            } else {
+                continue;
+            }
 
             if(slot_x < 0 || slot_y < 0) continue;
 
