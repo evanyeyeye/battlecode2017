@@ -5,8 +5,7 @@ public class Broadcast {
 
     static RobotController rc;
 
-    public static int REINFORCEMENTS_FULFILL_TIME = 10;
-
+    public static int REINFORCEMENTS_FULFILL_TIME = 20;
 
     /*
      * BEGIN INDEX ALLOCATION
@@ -28,8 +27,8 @@ public class Broadcast {
     // Only 10 robots can simultaneously request IDs
     public static int ID_REQUESTS[]             = {490, 491, 492, 493, 494, 495, 496, 497, 498, 499};
 
-    // FOR INDECES > 500:
-    // -- Indeces greater than 500 are used for specific robot actions
+    // FOR INDICES > 500:
+    // -- Indices greater than 500 are used for specific robot actions
     // -- Each robot that requests an ID will constantly check their spot
 
     /*

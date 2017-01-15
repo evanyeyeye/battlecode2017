@@ -25,7 +25,7 @@ public class Soldier extends RobotPlayer {
         initDirList();
 
 
-        System.out.println("I'm an soldier!");
+        System.out.println("I'm a soldier!");
         Team enemy = rc.getTeam().opponent();
 
         // The code you want your robot to perform every round should be in this loop
@@ -46,7 +46,7 @@ public class Soldier extends RobotPlayer {
                         int type = code/10000000;
                         switch(type) {
                             case REINFORCE:
-                                System.out.println("Responding to reinforcement request");
+                                // System.out.println("Responding to reinforcement request");
                                 tryMove(rc.getLocation().directionTo(new MapLocation(x, y)));
                                 break;
                         }

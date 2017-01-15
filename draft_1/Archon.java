@@ -67,7 +67,7 @@ public class Archon extends RobotPlayer {
 
             age = rc.readBroadcast(i);
             if(age == 0) continue;
-            if(age > 20) {
+            if(age > Broadcast.REINFORCEMENTS_FULFILL_TIME) {
                 rc.broadcast(i, 0);
                 continue;
             }
