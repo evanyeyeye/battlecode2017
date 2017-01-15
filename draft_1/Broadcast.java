@@ -22,6 +22,9 @@ public class Broadcast {
 
     public static int MAIN_ARCHON               = 99;
 
+    // IDs between 400 and 489 are used dynamically by the Archon
+
+
     // Only 10 robots can simultaneously request IDs
     public static int ID_REQUESTS[]             = {490, 491, 492, 493, 494, 495, 496, 497, 498, 499};
 
@@ -71,6 +74,15 @@ public class Broadcast {
             return id;
         }
         return ticket;
+    }
+
+    /*
+     * Location codes: dynamically allocated codes
+     *  -- negative indicates move away from
+     */
+    static boolean isLocationCode(int code) {
+        int acode = Math.abs(code)%10000000;
+        return acode >= 400000 && acode < 490000;
     }
 
     public static void broadcastLocation(int index, float x, float y) throws GameActionException {

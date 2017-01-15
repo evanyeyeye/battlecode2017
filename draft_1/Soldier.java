@@ -4,6 +4,18 @@ import battlecode.common.*;
 public class Soldier extends RobotPlayer {
 
     static int ID = 0;
+
+    /*
+     * SOLDIER SPECIFIC CODES
+     */
+
+    final public static int REINFORCE = 1;
+    final static int RETURN_TO_ARCHON = 1001; // not implemented
+
+    /*
+     * END SOLDIER SPECIFIC CODES
+     */
+
     // 0 == Need ID
     // [490,499] == ID request processing
     // [500,999] == ID established
@@ -25,6 +37,22 @@ public class Soldier extends RobotPlayer {
 
             // Try/catch blocks stop unhandled exceptions, which cause your robot to explode
             try {
+
+                if(ID > 500) {
+                    int code = rc.readBroadcast(ID);
+                    if(Broadcast.isLocationCode(code)) {
+                        int x = rc.readBroadcast((code%10000000)/1000);
+                        int y = rc.readBroadcast(code%1000);
+                        int type = code/10000000;
+                        switch(type) {
+                            case REINFORCE:
+                                System.out.println("Responding to reinforcement request");
+                                tryMove(rc.getLocation().directionTo(new MapLocation(x, y)));
+                                break;
+                        }
+                    }
+                }
+
                 MapLocation myLocation = rc.getLocation();
 
                 // See if there are any nearby enemy robots
@@ -33,6 +61,7 @@ public class Soldier extends RobotPlayer {
                 // If there are some...
                 if (robots.length > 0) {
                     // And we have enough bullets, and haven't attacked yet this turn...
+                    Broadcast.requestReinforcements(myLocation);
                     if (rc.canFireTriadShot()) {
                         // ...Then fire a bullet in the direction of the enemy.
                         rc.fireTriadShot(rc.getLocation().directionTo(robots[0].location));

@@ -13,6 +13,7 @@ public class Archon extends RobotPlayer {
     static int[] robots = new int[1000];
 
     static HashSet<Integer> unusedIDs = new HashSet<Integer>();
+    static HashSet<Integer>   usedIDs = new HashSet<Integer>();
     static void fulfillIDRequests() throws GameActionException {
 
         Iterator<Integer> it = unusedIDs.iterator();
@@ -22,8 +23,85 @@ public class Archon extends RobotPlayer {
             if(status == 1) {
                 int newIndex = it.next();
                 rc.broadcast(i, newIndex);
+                usedIDs.add(newIndex);
                 unusedIDs.remove(newIndex);
             }
+        }
+
+    }
+
+    // [400 - 490)
+    static HashSet<Integer> dynamicIDs_unallocated = new HashSet<Integer>();
+    static HashSet<Integer> dynamicIDs_allocated   = new HashSet<Integer>();
+
+
+    static int getDynamicSlot() {
+        if(dynamicIDs_unallocated.isEmpty()) return -1;
+        return dynamicIDs_unallocated.iterator().next();
+    }
+    static boolean allocate(int slot, int information) throws GameActionException {
+        if(dynamicIDs_allocated.contains(slot)) {
+            return false;
+        }
+        if(slot >= 1000 || slot < 0) {
+            for(int i=0;i<1000;i++) {
+                System.out.println("INVALID SLOT CALLED IN ALLOCATE: " + slot);
+            }
+            return false;
+        }
+        rc.broadcast(slot, information);
+        dynamicIDs_unallocated.remove(slot);
+        dynamicIDs_allocated.add(slot);
+        return true;
+    }
+    static boolean deallocate(int slot) {
+        if(dynamicIDs_unallocated.contains(slot)) {
+            return false;
+        }
+        dynamicIDs_allocated.remove(slot);
+        dynamicIDs_unallocated.add(slot);
+        return true;
+    }
+
+    static int reinforcements_slots[] = new int[4];
+    static void fulfillReinforcementsRequests() throws GameActionException {
+
+        int age;
+        int num_requests = 0;
+        for(int i=0;i<reinforcements_slots.length;i++) {
+            if(reinforcements_slots[i] != 0) {
+                deallocate(reinforcements_slots[i]);
+                reinforcements_slots[i] = 0;
+            }
+        }
+        for(int i : Broadcast.REINFORCEMENTS_REQUESTS) {
+
+            age = rc.readBroadcast(i);
+            if(age == 0) continue;
+            if(age > 20) {
+                rc.broadcast(i, 0);
+                continue;
+            }
+
+            int slot_x = getDynamicSlot();
+            int slot_y = getDynamicSlot();
+
+            if(slot_x < 0 || slot_y < 0) continue;
+
+            allocate(slot_x, rc.readBroadcast(i+1));
+            allocate(slot_y, rc.readBroadcast(i+2));
+
+            reinforcements_slots[num_requests++] = 1000*slot_x + slot_y + 10000000 * Soldier.REINFORCE;
+        }
+
+        if(num_requests == 0) return;
+
+        // Split requests across robots for now
+        Iterator<Integer> it = usedIDs.iterator();
+        while(it.hasNext()) {
+            int robot = it.next();
+            int sl = (int)(Math.random() * num_requests);
+            rc.broadcast(robot, reinforcements_slots[sl]);
         }
 
     }
@@ -38,13 +116,16 @@ public class Archon extends RobotPlayer {
 
     public static void run(RobotController rc) throws GameActionException {
 
-    	RobotPlayer.rc = rc;
+        RobotPlayer.rc = rc;
         initDirList();
 
         System.out.println("Archon Spawn: " + rc.getID());
 
         for(int i = 500; i<1000; i++) {
             unusedIDs.add(i);
+        }
+        for(int i = 400; i<490; i++) {
+            dynamicIDs_unallocated.add(i);
         }
 
         while (true) {
@@ -53,6 +134,7 @@ public class Archon extends RobotPlayer {
                 main_archon = main_archon || Broadcast.checkMainArchon();
                 if(main_archon) {
                     fulfillIDRequests();
+                    fulfillReinforcementsRequests();
                 }
 
                 // build gardeners
