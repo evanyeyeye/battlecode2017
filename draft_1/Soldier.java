@@ -53,7 +53,9 @@ public class Soldier extends RobotPlayer {
 
                 if(ID > 500) {
                     int code = rc.readBroadcast(ID);
-                    if(Broadcast.isDynamicChannelCode(code)) {
+                    // code <= 0 means the action has been disabled
+                    // or no action has been transmitted
+                    if(code > 0 && Broadcast.isDynamicChannelCode(code)) {
                         int[] coordinates = Broadcast.readDynamicChannelCode2(code);
                         int x = rc.readBroadcast(coordinates[0]);
                         int y = rc.readBroadcast(coordinates[1]);
