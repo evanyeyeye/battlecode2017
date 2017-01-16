@@ -74,7 +74,7 @@ public class Soldier extends RobotPlayer {
                                 try {
                                     tryMove(myLocation.directionTo(requestedLocation));
                                 } catch(Exception e) {
-                                    System.out.println("TRIED TO MOVE TO: " + x_f + " " + y_f);
+                                    System.out.println("EXCEPTION: TRIED TO MOVE TO: " + x_f + " " + y_f);
                                 }
                                 break;
                         }

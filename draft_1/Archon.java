@@ -69,10 +69,13 @@ public class Archon extends RobotPlayer {
             if(age == 0) continue;
             if(age > Broadcast.REINFORCEMENTS_FULFILL_TIME) {
                 rc.broadcast(i, 0);
+                System.out.println("REQUEST PULLED: " + i);
                 continue;
             } else {
                 rc.broadcast(i, age+1);
             }
+
+            System.out.println("REQUEST STANDING: " + i + " : " + age);
 
             if(dynamicIDs_unallocated.isEmpty()) continue;
             Iterator<Integer> it = dynamicIDs_unallocated.iterator();
@@ -86,6 +89,7 @@ public class Archon extends RobotPlayer {
 
             if(slot_x < 0 || slot_y < 0) continue;
 
+            // Allocate slots to start the location of the request
             allocate(slot_x, rc.readBroadcast(i+1));
             allocate(slot_y, rc.readBroadcast(i+2));
 
