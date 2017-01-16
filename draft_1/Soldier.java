@@ -63,8 +63,14 @@ public class Soldier extends RobotPlayer {
                         switch(type) {
                             case REINFORCE:
                                 System.out.println("Responding to reinforcement request at: " + x_f +  " " + y_f);
+                                MapLocation requestedLocation = new MapLocation(x_f, y_f);
+
+                                if(myLocation.distanceTo(requestedLocation) < 4) {
+                                    rc.broadcast(ID, code*-1);
+                                    break;
+                                }
                                 try {
-                                    tryMove(myLocation.directionTo(new MapLocation(x_f, y_f)));
+                                    tryMove(myLocation.directionTo(requestedLocation));
                                 } catch(Exception e) {
                                     System.out.println("TRIED TO MOVE TO: " + x_f + " " + y_f);
                                 }

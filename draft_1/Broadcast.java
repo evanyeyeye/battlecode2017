@@ -5,7 +5,7 @@ public class Broadcast {
 
     static RobotController rc;
 
-    public static int REINFORCEMENTS_FULFILL_TIME = 20;
+    public static int REINFORCEMENTS_FULFILL_TIME = 10;
 
     /*
      * BEGIN INDEX ALLOCATION
@@ -89,16 +89,13 @@ public class Broadcast {
     }
 
     static int locationCodeStatusFactor = 1000 * 1000;
-    /*
-     * Location codes: dynamically allocated codes
-     *  -- negative indicates move away from
-     */
+
     static boolean isDynamicChannelCode(int code) {
         int acode = Math.abs(code)%locationCodeStatusFactor;
         return acode >= 400000 && acode < 490000;
     }
     static int[] readDynamicChannelCode2(int code) {
-        int t = code%locationCodeStatusFactor;
+        int t = Math.abs(code)%locationCodeStatusFactor;
         int[] deconst = {t%1000, t/1000, code/locationCodeStatusFactor};
         return deconst;
     }

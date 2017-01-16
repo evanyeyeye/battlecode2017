@@ -97,7 +97,11 @@ public class Archon extends RobotPlayer {
         while(it.hasNext()) {
             int robot = it.next();
             int sl = (int)(Math.random() * num_requests);
-            rc.broadcast(robot, reinforcements_slots[sl]);
+
+            // If the same request hasn't been fulfilled
+            if(rc.readBroadcast(robot) != -1 * reinforcements_slots[sl]) {
+                rc.broadcast(robot, reinforcements_slots[sl]);
+            }
         }
 
     }
