@@ -29,7 +29,7 @@ public class Gardener extends RobotPlayer {
                 Direction towardsArchon = new Direction((float)Math.atan((archonLoc.x-rc.getLocation().x)/(archonLoc.y-rc.getLocation().y)));
 
                 // Randomly attempt to build a soldier in this direction
-                if (rc.hasRobotBuildRequirements(RobotType.SOLDIER) && rc.canBuildRobot(RobotType.SOLDIER, towardsArchon.opposite())) {
+                if (rc.hasRobotBuildRequirements(RobotType.SOLDIER) && rc.canBuildRobot(RobotType.SOLDIER, towardsArchon.opposite()) && Math.random() < 0.8) {
                     rc.buildRobot(RobotType.SOLDIER, towardsArchon.opposite());
                 }
 
