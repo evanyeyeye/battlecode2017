@@ -8,13 +8,6 @@ public class Gardener extends RobotPlayer {
         RobotPlayer.rc = rc;
         initDirList();
 
-        try {
-        	rc.broadcast(3,  rc.readBroadcast(3) + 1);
-        } catch (Exception e) {
-            System.out.println("Gardener Exception");
-            e.printStackTrace();
-        }
-
         System.out.println("Gardener Spawn: " + rc.getID());
 
         boolean hasSpawnedScout = false;
@@ -29,7 +22,8 @@ public class Gardener extends RobotPlayer {
                 Direction towardsArchon = new Direction((float)Math.atan((archonLoc.x-rc.getLocation().x)/(archonLoc.y-rc.getLocation().y)));
 
                 // Randomly attempt to build a soldier in this direction
-                if (rc.hasRobotBuildRequirements(RobotType.SOLDIER) && rc.canBuildRobot(RobotType.SOLDIER, towardsArchon.opposite()) && Math.random() < 0.8) {
+                if (rc.hasRobotBuildRequirements(RobotType.SOLDIER) && rc.canBuildRobot(RobotType.SOLDIER, towardsArchon.opposite())) {
+                    Broadcast.incrementSoldierCount();
                     rc.buildRobot(RobotType.SOLDIER, towardsArchon.opposite());
                 }
 

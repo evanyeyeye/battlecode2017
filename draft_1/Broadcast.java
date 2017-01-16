@@ -16,6 +16,13 @@ public class Broadcast {
     public static int MAIN_ARCHON_POSITION[]    = {0, 1};
     public static int ARCHON_POSITIONS[]        = {0, 1, 2, 3, 4, 5};
     public static int MAIN_ARCHON_IN_DISTRESS   = 6;
+
+    /* Indexes 7-10 Keeps track of the number of each robot type spawned */
+    public static int GARDENER_COUNT_INDEX = 7;
+    public static int SOLDIER_COUNT_INDEX = 8;
+    public static int LUMBERJACK_COUNT_INDEX = 9;
+    public static int SCOUT_COUNT_INDEX = 10;
+
     public static int REINFORCEMENTS_REQUESTS[] = {200, 203, 206, 209};
 
     // Each robot takes 3 indices: [age, x, y]
@@ -158,6 +165,30 @@ public class Broadcast {
         }
         broadcastLocation(max_index, ml.x, ml.y);
 
+    }
+
+    public static void incrementGardenerCount() throws GameActionException {
+        incrementGardenerCount(1);
+    }
+
+    public static void incrementGardenerCount(int num) throws GameActionException {
+        rc.broadcast(GARDENER_COUNT_INDEX, rc.readBroadcast(GARDENER_COUNT_INDEX) + num);
+    }
+
+    public static int getGardenerCount() throws GameActionException {
+        return rc.readBroadcast(GARDENER_COUNT_INDEX);
+    }
+
+    public static void incrementSoldierCount() throws GameActionException {
+        incrementSoldierCount(1);
+    }
+
+    public static void incrementSoldierCount(int num) throws GameActionException {
+        rc.broadcast(SOLDIER_COUNT_INDEX, rc.readBroadcast(SOLDIER_COUNT_INDEX) + num);
+    }
+
+    public static int getSoldierCount() throws GameActionException {
+        return rc.readBroadcast(SOLDIER_COUNT_INDEX);
     }
 
 }
