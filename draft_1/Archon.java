@@ -70,6 +70,8 @@ public class Archon extends RobotPlayer {
             if(age > Broadcast.REINFORCEMENTS_FULFILL_TIME) {
                 rc.broadcast(i, 0);
                 continue;
+            } else {
+                rc.broadcast(i, age+1);
             }
 
             if(dynamicIDs_unallocated.isEmpty()) continue;
