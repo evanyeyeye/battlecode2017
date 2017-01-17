@@ -124,6 +124,7 @@ public class Archon extends RobotPlayer {
 
         RobotPlayer.rc = rc;
         initDirList();
+        boolean hasHiredGardener = false;
 
         System.out.println("Archon Spawn: " + rc.getID());
 
@@ -145,16 +146,15 @@ public class Archon extends RobotPlayer {
                     fulfillIDRequests();
                     fulfillReinforcementsRequests();
                 }
+                
+                Direction dir = randomDirection();
 
                 // build gardeners
-                if (rc.hasRobotBuildRequirements(RobotType.GARDENER) && (Math.random() < 0.5 || Broadcast.getSoldierCount() >= (Broadcast.getGardenerCount()))) {
-                    for (int i=0; i<dirList.length; i++) {
-                        if (rc.canHireGardener(dirList[i])) {
-                            Broadcast.incrementGardenerCount();
-                            rc.hireGardener(dirList[i]);
-                            break;
-                        }
-                    }
+                if(rc.hasRobotBuildRequirements(RobotType.GARDENER) && rc.canHireGardener(dir) && !hasHiredGardener) {
+                	rc.hireGardener(dir);
+                	hasHiredGardener = true;
+                } else if (rc.hasRobotBuildRequirements(RobotType.GARDENER) && rc.canHireGardener(dir) && Math.random() < .5) {
+                    rc.hireGardener(dir);
                 }
                 MapLocation archonLocation = rc.getLocation();
 

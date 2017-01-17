@@ -22,9 +22,9 @@ public class Gardener extends RobotPlayer {
                 Direction towardsArchon = new Direction((float)Math.atan((archonLoc.x-rc.getLocation().x)/(archonLoc.y-rc.getLocation().y)));
 
                 // Randomly attempt to build a soldier in this direction
-                if (rc.hasRobotBuildRequirements(RobotType.SOLDIER) && rc.canBuildRobot(RobotType.SOLDIER, towardsArchon.opposite())) {
+                if (rc.hasRobotBuildRequirements(RobotType.SOLDIER) && rc.canBuildRobot(RobotType.SOLDIER, towardsArchon.opposite()) && Math.random() < .8) {
                     Broadcast.incrementSoldierCount();
-                    rc.buildRobot(RobotType.SOLDIER, towardsArchon.opposite());
+                	rc.buildRobot(RobotType.SOLDIER, towardsArchon.opposite());
                 }
 
                 /*
@@ -39,7 +39,7 @@ public class Gardener extends RobotPlayer {
                 //}
 
                 Direction dir = randomDirection();
-                if(rc.canPlantTree(dir) && Math.random() < 0.2) {
+                if(rc.canPlantTree(dir) && Broadcast.getSoldierCount() >= Broadcast.getGardenerCount()) {
                     rc.plantTree(dir);
                 }
                 TreeInfo[] trees = rc.senseNearbyTrees();
