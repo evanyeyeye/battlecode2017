@@ -103,8 +103,8 @@ public class Soldier extends RobotPlayer {
                 }
 
                 // See if there are any nearby enemy robots
-                RobotInfo[] robots = rc.senseNearbyRobots(-1, enemy);
-                RobotInfo[] friendlies = rc.senseNearbyRobots(-1, ally);
+                RobotInfo[] robots = rc.senseNearbyRobots(rc.getType().sensorRadius, enemy);
+                RobotInfo[] friendlies = rc.senseNearbyRobots(rc.getType().sensorRadius, ally);
 
                 // If there are some...
                 if (robots.length > 0) {
@@ -113,7 +113,57 @@ public class Soldier extends RobotPlayer {
                     if(distanceToArchon < 25) {
                         Broadcast.alertArchon(myLocation);
                     }
-                    if (rc.canFireTriadShot()) {
+                    if (Direct.retreat() && rc.canFirePentadShot()) {
+                    	boolean shoot = true;
+                        Direction towardsEn = null;
+                        for(RobotInfo en : robots) {
+                            towardsEn = myLocation.directionTo(en.location);
+                            if(myLocation.distanceTo(en.location) < 4) {
+                                rc.firePentadShot(towardsEn);
+                                break;
+                            }
+                            for(RobotInfo friendly : friendlies) {
+                                if(myLocation.directionTo(friendly.location).degreesBetween(towardsEn) < 50) {
+                                    shoot = false;
+                                    break;
+                                }
+                            }
+                            if(shoot && towardsEn != null) {
+                                rc.firePentadShot(towardsEn);
+                                tryMove(towardsEn.opposite());
+                                break;
+                            }
+                        }
+                        if(!shoot && towardsEn != null) {
+                            tryMove(towardsEn);
+                        }
+                    }
+                   	else if (friendlies.length > robots.length * 2 && rc.canFireSingleShot()) {
+                   		boolean shoot = true;
+                        Direction towardsEn = null;
+                        for(RobotInfo en : robots) {
+                            towardsEn = myLocation.directionTo(en.location);
+                            if(myLocation.distanceTo(en.location) < 4) {
+                                rc.fireSingleShot(towardsEn);
+                                break;
+                            }
+                            for(RobotInfo friendly : friendlies) {
+                                if(myLocation.directionTo(friendly.location).degreesBetween(towardsEn) < 50) {
+                                    shoot = false;
+                                    break;
+                                }
+                            }
+                            if(shoot && towardsEn != null) {
+                                rc.fireSingleShot(towardsEn);
+                                tryMove(towardsEn.opposite());
+                                break;
+                            }
+                        }
+                        if(!shoot && towardsEn != null) {
+                            tryMove(towardsEn);
+                        }
+                   	}
+                    else if (rc.canFireTriadShot()) {
                         // ...Then fire a bullet in the direction of the enemy.
                         boolean shoot = true;
                         Direction towardsEn = null;
@@ -160,28 +210,6 @@ public class Soldier extends RobotPlayer {
                 }
 
                 Clock.yield();
-                
-                
-                /*
-                //MapLocation myLocation = rc.getLocation();
-                //Direction towardsArchon = new Direction((float) Math.atan((archonLoc.x-myLocation.x)/(archonLoc.y-myLocation.y)));
-                // See if there are any nearby enemy robots
-                RobotInfo[] robots = rc.senseNearbyRobots(-1, enemy);
-                // If there are some...
-                if (robots.length > 0) {
-                    // And we have enough bullets, and haven't attacked yet this turn...
-                    if (rc.canFireTriadShot()) {
-                        // ...Then fire a bullet in the direction of the enemy.
-                        rc.fireTriadShot(rc.getLocation().directionTo(robots[0].location));
-                        tryMove(rc.getLocation().directionTo(robots[0].location).opposite());
-                    } else {
-                        tryMove(rc.getLocation().directionTo(robots[0].location));
-                    }
-                } else {
-                    tryMove(randomDirection());
-                }
-                // Clock.yield() makes the robot wait until the next turn, then it will perform this loop again
-                Clock.yield();*/
 
             } catch (Exception e) {
                 System.out.println("Soldier Exception");
