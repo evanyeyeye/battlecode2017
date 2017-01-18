@@ -64,17 +64,21 @@ public class Soldier extends RobotPlayer {
                         int type = coordinates[2];
                         switch(type) {
                             case REINFORCE:
-                                System.out.println("Responding to reinforcement request at: " + x_f +  " " + y_f);
-                                MapLocation requestedLocation = new MapLocation(x_f, y_f);
+                                if(Direct.retreat())
+                                    tryMove(myLocation.directionTo(archonLocation));
+                                else {
+                                    System.out.println("Responding to reinforcement request at: " + x_f +  " " + y_f);
+                                    MapLocation requestedLocation = new MapLocation(x_f, y_f);
 
-                                if(myLocation.distanceTo(requestedLocation) < 4) {
-                                    rc.broadcast(ID, code*-1);
-                                    break;
-                                }
-                                try {
-                                    tryMove(myLocation.directionTo(requestedLocation));
-                                } catch(Exception e) {
-                                    System.out.println("EXCEPTION: TRIED TO MOVE TO: " + x_f + " " + y_f);
+                                    if(myLocation.distanceTo(requestedLocation) < 4) {
+                                        rc.broadcast(ID, code*-1);
+                                        break;
+                                    }
+                                    try {
+                                        tryMove(myLocation.directionTo(requestedLocation));
+                                    } catch(Exception e) {
+                                        System.out.println("EXCEPTION: TRIED TO MOVE TO: " + x_f + " " + y_f);
+                                    }
                                 }
                                 break;
                         }
@@ -97,7 +101,12 @@ public class Soldier extends RobotPlayer {
                 //Direction towardsArchon = new Direction((float)Math.atan((archonLoc.x-rc.getLocation().x)/(archonLoc.y-rc.getLocation().y)));
                 // Move randomly
                 //tryMove(towardsArchon.opposite());
-                tryMove(randomDirection());
+                if(Direct.toEnemyGroup() != null)
+                    tryMove(Direct.toEnemyGroup());
+                else if(Direct.retreat())
+                    tryMove(myLocation.directionTo(archonLocation));
+                else
+                    tryMove(randomDirection());
                 // Clock.yield() makes the robot wait until the next turn, then it will perform this loop again
                 Clock.yield();
                 /*
