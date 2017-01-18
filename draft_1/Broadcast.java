@@ -184,7 +184,8 @@ public class Broadcast {
     }
 
     public static void dying(int ID) throws GameActionException {
-        rc.broadcast(ID, DYING);
+		if(ID >= 500 && ID < 1000)
+			rc.broadcast(ID, DYING);
     }
 
     /*
