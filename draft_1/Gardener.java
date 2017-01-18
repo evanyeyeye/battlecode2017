@@ -4,6 +4,7 @@ import battlecode.common.*;
 public class Gardener extends RobotPlayer {
 
 	static TreeInfo[] plantedOwner = new TreeInfo[100];
+	static int treeIndex = 0;
 	
     public static void run(RobotController rc) throws GameActionException {
 
@@ -12,6 +13,8 @@ public class Gardener extends RobotPlayer {
         RobotPlayer.rc = rc;
         initDirList();
 
+        boolean init = true;
+        
         while (true) {
 
             try {
@@ -20,36 +23,57 @@ public class Gardener extends RobotPlayer {
                 archonLoc = new MapLocation(rc.readBroadcast(0), rc.readBroadcast(1));
 
                 Direction towardsArchon = new Direction((float)Math.atan((archonLoc.x-rc.getLocation().x)/(archonLoc.y-rc.getLocation().y)));
-
-                // Randomly attempt to build a soldier in this direction
-                if (rc.hasRobotBuildRequirements(RobotType.SOLDIER) && rc.canBuildRobot(RobotType.SOLDIER, towardsArchon.opposite()) && Math.random() < .8) {
-                    Broadcast.incrementSoldierCount();
-                	rc.buildRobot(RobotType.SOLDIER, towardsArchon.opposite());
+                
+                if (init) {
+                	for (int i=0; i<5; i++) {
+                		if (!tryMove(towardsArchon.opposite()))
+                			tryMove(randomDirection());
+                		Clock.yield();
+                	}
+                	init = false;
                 }
-
+                
                 /*
-                if (rc.hasRobotBuildRequirements(RobotType.SCOUT) && rc.canBuildRobot(RobotType.SCOUT, towardsArchon.opposite()) && !hasSpawnedScout) {
-                    rc.buildRobot(RobotType.SCOUT, towardsArchon.opposite());
-                    hasSpawnedScout = true;
-                } */
-
-                // Move randomly
-                //if(!tryMove(towardsArchon)) {
-                    tryMove(randomDirection());
-                //}
-
+                 * Processes:
+                 * ----------
+                 * move
+                 * water
+                 * plant trees
+                 * build robots
+                 */
+                
+                // move
+                if (rc.getLocation().distanceTo(archonLoc) < 5.0 && !tryMove(towardsArchon.opposite()))
+                	tryMove(randomDirection());
+                
                 Direction dir = randomDirection();
                 if(rc.canPlantTree(dir) && Broadcast.getSoldierCount() >= Broadcast.getGardenerCount()) {
                     rc.plantTree(dir);
                 }
-                TreeInfo[] trees = rc.senseNearbyTrees();
-                if(trees.length > 0 && rc.canWater(trees[0].location) && Math.random() < 0.3) {
-                    rc.water(trees[0].location);
-                    //rc.shake(trees[0].location);
-                    /*if(rc.getTeamBullets() > 100.0) {
-                        rc.donate((float) 10.0);
-                    }*/
+                
+                // water
+                TreeInfo[] nearbyTrees = rc.senseNearbyTrees();
+                if(nearbyTrees.length > 0 && rc.canWater(nearbyTrees[0].location)) {
+                    rc.water(nearbyTrees[0].location);
+                    //test
+                    System.out.println("Just watered: " + rc.canBuildRobot(RobotType.SOLDIER, randomDirection()));
                 }
+
+                // Build a soldier
+                if (rc.hasRobotBuildRequirements(RobotType.SOLDIER)) {
+                	if (rc.canBuildRobot(RobotType.SOLDIER, towardsArchon.opposite())) {
+                		rc.buildRobot(RobotType.SOLDIER, towardsArchon.opposite());
+                	} else {
+                		Direction randomDirBuild = randomDirection();
+                		while (!rc.canBuildRobot(RobotType.SOLDIER, randomDirBuild))
+                			randomDirBuild = randomDirection();
+                		rc.buildRobot(RobotType.SOLDIER, randomDirBuild);
+                	}
+                	Broadcast.incrementSoldierCount();
+                }
+
+                if (rc.getTeamBullets() >= 200) 
+                	rc.donate(10);
 
                 Clock.yield();
 

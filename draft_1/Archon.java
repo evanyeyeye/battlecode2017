@@ -149,9 +149,12 @@ public class Archon extends RobotPlayer {
                 // Build gardeners 
                 Direction dir = randomDirection();
 
-                if(rc.hasRobotBuildRequirements(RobotType.GARDENER) && rc.canHireGardener(dir)) {
-                	rc.hireGardener(dir);
-                } 
+                // keep outer if statement, ima add something - evan
+                if (rc.hasRobotBuildRequirements(RobotType.GARDENER) && rc.canHireGardener(dir)
+                		&& (Broadcast.getGardenerCount() <= Broadcast.getSoldierCount() || rc.getTeamBullets() > 125)) {
+            		rc.hireGardener(dir);
+            		Broadcast.incrementGardenerCount();
+                }
                 
                 MapLocation archonLocation = rc.getLocation();
 
