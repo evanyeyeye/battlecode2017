@@ -151,8 +151,7 @@ public class Archon extends RobotPlayer {
                 // Build gardeners 
                 Direction dir = rc.getLocation().directionTo(enemyArchonLocations[0]);
 
-                if (rc.hasRobotBuildRequirements(RobotType.GARDENER) && rc.canHireGardener(dir)
-                		&& Broadcast.getGardenerCount() <= Broadcast.getSoldierCount() * 2 / 3) {
+                if (rc.hasRobotBuildRequirements(RobotType.GARDENER) && rc.canHireGardener(dir)) {
             		rc.hireGardener(dir);
             		Broadcast.incrementGardenerCount();
                 }
