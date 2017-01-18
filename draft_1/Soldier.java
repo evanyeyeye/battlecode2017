@@ -3,6 +3,8 @@ import battlecode.common.*;
 
 public class Soldier extends RobotPlayer {
 
+    static final MAX_HP = 50;
+
     static int ID = 0;
 
     /*

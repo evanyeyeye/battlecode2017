@@ -3,6 +3,8 @@ import battlecode.common.*;
 
 public class Gardener extends RobotPlayer {
 
+    static final MAX_HP = 40;
+
 	static TreeInfo[] plantedOwner = new TreeInfo[100];
 	static int treeIndex = 0;
 	static int treeSize = 0;

@@ -6,6 +6,8 @@ import java.util.Iterator;
 
 public class Archon extends RobotPlayer {
 
+    static final MAX_HP = 400;
+
     static MapLocation[] corners = new MapLocation[4];
 
     static HashSet<Integer> unusedIDs = new HashSet<Integer>();
