@@ -3,7 +3,7 @@ import battlecode.common.*;
 
 public class Scout extends RobotPlayer {
 
-    static final MAX_HP = 20;
+    static final int MAX_HP = 20;
 
 	public static double[] goToEdge() {
 		Direction way = randomDirection();

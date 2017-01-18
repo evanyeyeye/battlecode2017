@@ -5,7 +5,8 @@ public class Broadcast {
 
     static RobotController rc;
 
-    public static int REINFORCEMENTS_FULFILL_TIME = 10;
+    final public static int REINFORCEMENTS_FULFILL_TIME = 10;
+    final public static int DYING = -666;
 
     /*
      * BEGIN INDEX ALLOCATION
@@ -180,6 +181,10 @@ public class Broadcast {
             Float.intBitsToFloat(rc.readBroadcast(1))
         };
         return coordinates;
+    }
+
+    public static void dying(int ID) throws GameActionException {
+        rc.broadcast(ID, DYING);
     }
 
     /*

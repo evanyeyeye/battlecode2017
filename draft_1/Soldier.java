@@ -3,7 +3,9 @@ import battlecode.common.*;
 
 public class Soldier extends RobotPlayer {
 
-    static final MAX_HP = 50;
+    static final int MAX_HP = 50;
+
+    static boolean dying = false;
 
     static int ID = 0;
 
@@ -37,7 +39,7 @@ public class Soldier extends RobotPlayer {
             // Try/catch blocks stop unhandled exceptions, which cause your robot to explode
             try {
 
-                if(ID < 500) {
+                if(ID < 500 && !dying) {
                     ID = Broadcast.requestID(ID);
                 }
 
@@ -50,11 +52,23 @@ public class Soldier extends RobotPlayer {
                 MapLocation myLocation = rc.getLocation();
 
                 MapLocation archonLocation = new MapLocation(archon_x, archon_y);
-                if(Broadcast.checkMainArchonDistress()) {
-                    tryMove(myLocation.directionTo(archonLocation));
+                float distanceToArchon = myLocation.distanceTo(archonLocation);
+                if(Broadcast.checkMainArchonDistress() || dying) {
+                    if(distanceToArchon > 15) {
+                        tryMove(myLocation.directionTo(archonLocation));
+                    }
+                }
+
+                // Read instructions but immediately broadcast death notice
+                if(rc.getHealth() < MAX_HP/10) {
+                    // Revoke ID
+                    Broadcast.dying(ID);
+                    dying = true;
+                    ID = -ID;
                 }
 
                 if(ID > 500) {
+
                     int code = rc.readBroadcast(ID);
                     // code <= 0 means the action has been disabled
                     // or no action has been transmitted
@@ -96,6 +110,9 @@ public class Soldier extends RobotPlayer {
                 if (robots.length > 0) {
                     // And we have enough bullets, and haven't attacked yet this turn...
                     Broadcast.requestReinforcements(myLocation);
+                    if(distanceToArchon < 25) {
+                        Broadcast.alertArchon(myLocation);
+                    }
                     if (rc.canFireTriadShot()) {
                         // ...Then fire a bullet in the direction of the enemy.
                         boolean shoot = true;
@@ -130,7 +147,7 @@ public class Soldier extends RobotPlayer {
                     tryMove(myLocation.directionTo(archonLocation));
                 else {
                     if(!Broadcast.anyReinforcementsRequests()) {
-                        if(myLocation.distanceTo(archonLocation) < 30) {
+                        if(distanceToArchon < 30) {
                             int len = RobotPlayer.enemyArchonLocations.length;
                             if(len > 0) {
                                 int index = (int)(Math.random() * len);

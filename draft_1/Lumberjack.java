@@ -3,7 +3,7 @@ import battlecode.common.*;
 
 public class Lumberjack extends RobotPlayer {
 
-    static final MAX_HP = 50;
+    static final int MAX_HP = 50;
 
     public static void run(RobotController rc) {
         RobotPlayer.rc = rc;

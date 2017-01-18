@@ -3,7 +3,7 @@ import battlecode.common.*;
 
 public class Gardener extends RobotPlayer {
 
-    static final MAX_HP = 40;
+    static final int MAX_HP = 40;
 
 	static TreeInfo[] plantedOwner = new TreeInfo[100];
 	static int treeIndex = 0;
@@ -97,10 +97,11 @@ public class Gardener extends RobotPlayer {
                 }
                 
                 // Move randomly
-                if(myLocation.distanceTo(archonLoc) < 20) {
+                float dist = myLocation.distanceTo(archonLoc);
+                if(dist < 20) {
                     tryMove(towardsArchon.opposite());
                 } else {
-                    if(!tryMove(towardsArchon)) {
+                    if(dist < 30 || !tryMove(towardsArchon)) {
                         tryMove(randomDirection());
                     }
                 }
