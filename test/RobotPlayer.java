@@ -94,6 +94,7 @@ public strictfp class RobotPlayer {
                 int yPos = rc.readBroadcast(1);
                 archonLoc = new MapLocation(xPos,yPos);
 
+                rc.broadcast(((int)Math.random() * 1000), 10);
                 // Generate a random direction
                 Direction towardsArchon = new Direction((float)Math.atan((archonLoc.x-rc.getLocation().x)/(archonLoc.y-rc.getLocation().y)));
                 // Randomly attempt to build a soldier or lumberjack in this direction

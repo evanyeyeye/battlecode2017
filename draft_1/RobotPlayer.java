@@ -5,7 +5,7 @@ public strictfp class RobotPlayer {
 
     static RobotController rc;
 
-    static MapLocation[] enemyArchonLocations; // = rc.getInitialArchonLocations(rc.getTeam().opponent());
+    static MapLocation[] enemyArchonLocations;
 
     static MapLocation archonLoc;
     
@@ -15,6 +15,7 @@ public strictfp class RobotPlayer {
     public static void run(RobotController rc) throws GameActionException {
         Broadcast.initBroadcaster(rc);
         Direct.initDirector(rc);
+        enemyArchonLocations = rc.getInitialArchonLocations(rc.getTeam().opponent());
         switch (rc.getType()) {
             case ARCHON:
                 Archon.run(rc);

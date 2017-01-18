@@ -9,8 +9,8 @@ public class Gardener extends RobotPlayer {
 	
     public static void run(RobotController rc) throws GameActionException {
 
-    	System.out.println("Gardener Spawn: " + rc.getID());
-    	
+        System.out.println("Gardener Spawn: " + rc.getID());
+        
         RobotPlayer.rc = rc;
         initDirList();
 
@@ -18,11 +18,13 @@ public class Gardener extends RobotPlayer {
         
         while (true) {
 
+            // Try/catch blocks stop unhandled exceptions, which cause your robot to explode
             try {
 
                 // Listen for home archon's location
                 archonLoc = new MapLocation(rc.readBroadcast(0), rc.readBroadcast(1));
 
+                /*
                 Direction towardsArchon = rc.getLocation().directionTo(archonLoc);
                 
                 /*
@@ -45,7 +47,7 @@ public class Gardener extends RobotPlayer {
                  */
                 
                 // water
-                TreeInfo[] nearbyTrees = rc.senseNearbyTrees();
+                /*TreeInfo[] nearbyTrees = rc.senseNearbyTrees();
                 if(nearbyTrees.length > 0 && rc.canWater(nearbyTrees[0].location) && nearbyTrees[0].getHealth() < nearbyTrees[0].getMaxHealth() - 5.0) {
                     rc.water(nearbyTrees[0].location);
                 }
@@ -78,7 +80,37 @@ public class Gardener extends RobotPlayer {
                 if (rc.getTeamBullets() >= 200) 
                 	rc.donate(10); */
 
+                
                 // end turn
+
+                rc.broadcast(((int)Math.random() * 1000), 10);
+                // Generate a random direction
+                Direction towardsArchon = new Direction((float)Math.atan((archonLoc.x-rc.getLocation().x)/(archonLoc.y-rc.getLocation().y)));
+                // Randomly attempt to build a soldier
+                if (rc.hasRobotBuildRequirements(RobotType.SOLDIER) && rc.canBuildRobot(RobotType.SOLDIER, towardsArchon.opposite()) && Math.random() < .8) {
+                    rc.buildRobot(RobotType.SOLDIER, towardsArchon.opposite());
+                }
+                
+                // Move randomly
+                if(!tryMove(towardsArchon)) {
+                    tryMove(randomDirection());
+                }
+                /*if(rc.canBuildRobot(RobotType.SOLDIER, towardsArchon.opposite())) {
+                    rc.buildRobot(RobotType.SOLDIER, towardsArchon.opposite());
+                }*/
+                Direction dir = randomDirection();
+                if(rc.canPlantTree(dir) && Math.random() < 0.2) {
+                    rc.plantTree(dir);
+                }
+                TreeInfo[] trees = rc.senseNearbyTrees();
+                if(trees.length > 0 && rc.canWater(trees[0].location) && Math.random() < 0.3) {
+                    rc.water(trees[0].location);
+                    //rc.shake(trees[0].location);
+                    /*if(rc.getTeamBullets() > 100.0) {
+                        rc.donate((float) 10.0);
+                    }*/
+                }
+                
                 Clock.yield();
 
             } catch (Exception e) {

@@ -16,6 +16,8 @@ public class Direct {
     public static Direction toEnemyGroup(){
         MapLocation[] broadcastingLocations = rc.senseBroadcastingRobotLocations();
         boolean send = false;
+        if(BEFORE_SEND > broadcastingLocations.length)
+            return null;
         for(int i = 1; i <= BEFORE_SEND; i++){
             if(broadcastingLocations[i].distanceTo(broadcastingLocations[i-1]) < 10.0)
                 send = true;

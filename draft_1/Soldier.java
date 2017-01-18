@@ -64,9 +64,9 @@ public class Soldier extends RobotPlayer {
                         int type = coordinates[2];
                         switch(type) {
                             case REINFORCE:
-                                if(Direct.retreat())
-                                    tryMove(myLocation.directionTo(archonLocation));
-                                else {
+                                // if(Direct.retreat())
+                                //     tryMove(myLocation.directionTo(archonLocation));
+                                // else {
                                     System.out.println("Responding to reinforcement request at: " + x_f +  " " + y_f);
                                     MapLocation requestedLocation = new MapLocation(x_f, y_f);
 
@@ -79,7 +79,7 @@ public class Soldier extends RobotPlayer {
                                     } catch(Exception e) {
                                         System.out.println("EXCEPTION: TRIED TO MOVE TO: " + x_f + " " + y_f);
                                     }
-                                }
+                                // }
                                 break;
                         }
                     }
@@ -101,13 +101,7 @@ public class Soldier extends RobotPlayer {
                 //Direction towardsArchon = new Direction((float)Math.atan((archonLoc.x-rc.getLocation().x)/(archonLoc.y-rc.getLocation().y)));
                 // Move randomly
                 //tryMove(towardsArchon.opposite());
-
-                if(Direct.toEnemyGroup() != null)
-                    tryMove(Direct.toEnemyGroup());
-                else if(Direct.retreat())
-                    tryMove(myLocation.directionTo(archonLocation));
-                else
-                    tryMove(randomDirection());
+                tryMove(randomDirection());
 
                 Clock.yield();
                 
