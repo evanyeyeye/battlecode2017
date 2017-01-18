@@ -27,16 +27,17 @@ public class Soldier extends RobotPlayer {
 
         System.out.println("I'm a soldier!");
         Team enemy = rc.getTeam().opponent();
+        Team ally  = rc.getTeam();
 
         // The code you want your robot to perform every round should be in this loop
         while (true) {
 
-            if(ID < 500) {
-                ID = Broadcast.requestID(ID);
-            }
-
             // Try/catch blocks stop unhandled exceptions, which cause your robot to explode
             try {
+
+                if(ID < 500) {
+                    ID = Broadcast.requestID(ID);
+                }
 
 
                 float archon_x = Float.intBitsToFloat(rc.readBroadcast(
@@ -87,6 +88,7 @@ public class Soldier extends RobotPlayer {
 
                 // See if there are any nearby enemy robots
                 RobotInfo[] robots = rc.senseNearbyRobots(-1, enemy);
+                RobotInfo[] friendlies = rc.senseNearbyRobots(-1, ally);
 
                 // If there are some...
                 if (robots.length > 0) {
@@ -94,8 +96,29 @@ public class Soldier extends RobotPlayer {
                     Broadcast.requestReinforcements(myLocation);
                     if (rc.canFireTriadShot()) {
                         // ...Then fire a bullet in the direction of the enemy.
-                        rc.fireTriadShot(rc.getLocation().directionTo(robots[0].location));
-                        tryMove(rc.getLocation().directionTo(robots[0].location).opposite());
+                        boolean shoot = true;
+                        Direction towardsEn = null;
+                        for(RobotInfo en : robots) {
+                            towardsEn = myLocation.directionTo(en.location);
+                            if(myLocation.distanceTo(en.location) < 4) {
+                                rc.fireTriadShot(towardsEn);
+                                break;
+                            }
+                            for(RobotInfo friendly : friendlies) {
+                                if(myLocation.directionTo(friendly.location).degreesBetween(towardsEn) < 50) {
+                                    shoot = false;
+                                    break;
+                                }
+                            }
+                            if(shoot && towardsEn != null) {
+                                rc.fireTriadShot(towardsEn);
+                                tryMove(towardsEn.opposite());
+                                break;
+                            }
+                        }
+                        if(!shoot && towardsEn != null) {
+                            tryMove(towardsEn);
+                        }
                     }
                 }
                 //Direction towardsArchon = new Direction((float)Math.atan((archonLoc.x-rc.getLocation().x)/(archonLoc.y-rc.getLocation().y)));
@@ -103,8 +126,19 @@ public class Soldier extends RobotPlayer {
                 //tryMove(towardsArchon.opposite());
                 if(Direct.retreat())
                     tryMove(myLocation.directionTo(archonLocation));
-                else
-                    tryMove(randomDirection());
+                else {
+                    if(!Broadcast.anyReinforcementsRequests()) {
+                        if(myLocation.distanceTo(archonLocation) < 30) {
+                            int len = RobotPlayer.enemyArchonLocations.length;
+                            if(len > 0) {
+                                int index = (int)(Math.random() * len);
+                                tryMove(myLocation.directionTo(RobotPlayer.enemyArchonLocations[index]));
+                            }
+                        } else {
+                            tryMove(myLocation.directionTo(archonLocation));
+                        }
+                    }
+                }
 
                 Clock.yield();
                 

@@ -167,6 +167,21 @@ public class Broadcast {
 
     }
 
+    public static boolean anyReinforcementsRequests() throws GameActionException {
+        for(int i : REINFORCEMENTS_REQUESTS) {
+            if(rc.readBroadcast(i) > 0) return true;
+        }
+        return false;
+    }
+
+    public static float[] getArchonLocation() throws GameActionException {
+        float coordinates[] = {
+            Float.intBitsToFloat(rc.readBroadcast(0)),
+            Float.intBitsToFloat(rc.readBroadcast(1))
+        };
+        return coordinates;
+    }
+
     /*
      * Unit Counting
      */

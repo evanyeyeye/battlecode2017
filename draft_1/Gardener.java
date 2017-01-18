@@ -22,7 +22,8 @@ public class Gardener extends RobotPlayer {
             try {
 
                 // Listen for home archon's location
-                archonLoc = new MapLocation(rc.readBroadcast(0), rc.readBroadcast(1));
+                float archonCoords[] = Broadcast.getArchonLocation();
+                archonLoc = new MapLocation(archonCoords[0], archonCoords[1]);
 
                 /*
                 Direction towardsArchon = rc.getLocation().directionTo(archonLoc);
@@ -83,24 +84,32 @@ public class Gardener extends RobotPlayer {
                 
                 // end turn
 
-                rc.broadcast(((int)Math.random() * 1000), 10);
+                // rc.broadcast(((int)Math.random() * 1000), 10);
                 // Generate a random direction
-                Direction towardsArchon = new Direction((float)Math.atan((archonLoc.x-rc.getLocation().x)/(archonLoc.y-rc.getLocation().y)));
+                // Direction towardsArchon = new Direction((float)Math.atan((archonLoc.x-rc.getLocation().x)/(archonLoc.y-rc.getLocation().y)));
+                MapLocation myLocation = rc.getLocation();
+                Direction towardsArchon = myLocation.directionTo(archonLoc);
                 // Randomly attempt to build a soldier
                 if (rc.hasRobotBuildRequirements(RobotType.SOLDIER) && rc.canBuildRobot(RobotType.SOLDIER, towardsArchon.opposite()) && Math.random() < .8) {
                     rc.buildRobot(RobotType.SOLDIER, towardsArchon.opposite());
                 }
                 
                 // Move randomly
-                if(!tryMove(towardsArchon)) {
-                    tryMove(randomDirection());
+                if(myLocation.distanceTo(archonLoc) < 20) {
+                    tryMove(towardsArchon.opposite());
+                } else {
+                    if(!tryMove(towardsArchon)) {
+                        tryMove(randomDirection());
+                    }
                 }
                 /*if(rc.canBuildRobot(RobotType.SOLDIER, towardsArchon.opposite())) {
                     rc.buildRobot(RobotType.SOLDIER, towardsArchon.opposite());
                 }*/
-                Direction dir = randomDirection();
-                if(rc.canPlantTree(dir) && Math.random() < 0.2) {
-                    rc.plantTree(dir);
+                if(!Broadcast.anyReinforcementsRequests()) {
+                    Direction dir = randomDirection();
+                    if(rc.canPlantTree(dir) && Math.random() < 0.1) {
+                        rc.plantTree(dir);
+                    }
                 }
                 TreeInfo[] trees = rc.senseNearbyTrees();
                 if(trees.length > 0 && rc.canWater(trees[0].location) && Math.random() < 0.3) {
