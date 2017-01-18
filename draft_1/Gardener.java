@@ -71,7 +71,7 @@ public class Gardener extends RobotPlayer {
                 
                 // plant
                 Direction dir = randomDirection();
-                if(rc.hasTreeBuildRequirements() && rc.canPlantTree(dir) && Math.random() < .05) {
+                if(rc.hasTreeBuildRequirements() && rc.canPlantTree(dir) && Math.random() < .1) {
                     rc.plantTree(dir);
                 }
 

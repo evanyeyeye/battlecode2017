@@ -98,8 +98,14 @@ public class Soldier extends RobotPlayer {
                 // Move randomly
                 //tryMove(towardsArchon.opposite());
                 tryMove(randomDirection());
-                // Clock.yield() makes the robot wait until the next turn, then it will perform this loop again
+                
+                
+                if (rc.getHealth() < 10)
+                	Broadcast.incrementSoldierCount(-1);
+                
                 Clock.yield();
+                
+                
                 /*
                 //MapLocation myLocation = rc.getLocation();
                 //Direction towardsArchon = new Direction((float) Math.atan((archonLoc.x-myLocation.x)/(archonLoc.y-myLocation.y)));
