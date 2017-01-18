@@ -5,6 +5,7 @@ public class Gardener extends RobotPlayer {
 
 	static TreeInfo[] plantedOwner = new TreeInfo[100];
 	static int treeIndex = 0;
+	static int treeSize = 0;
 	
     public static void run(RobotController rc) throws GameActionException {
 
@@ -20,13 +21,11 @@ public class Gardener extends RobotPlayer {
             try {
 
                 // Listen for home archon's location
-                int xPos = rc.readBroadcast(0);
-                int yPos = rc.readBroadcast(1);
-                archonLoc = new MapLocation(xPos,yPos);
+                archonLoc = new MapLocation(rc.readBroadcast(0), rc.readBroadcast(1));
 
-                // Generate a random direction
-                Direction towardsArchon = new Direction((float)Math.atan((archonLoc.x-rc.getLocation().x)/(archonLoc.y-rc.getLocation().y)));
+                Direction towardsArchon = rc.getLocation().directionTo(archonLoc);
                 
+                /*
                 if (init) {
                 	for (int i=0; i<5; i++) {
                 		if (!tryMove(towardsArchon.opposite()))
@@ -34,7 +33,7 @@ public class Gardener extends RobotPlayer {
                 		Clock.yield();
                 	}
                 	init = false;
-                }
+                } */
                 
                 /*
                  * Processes:
@@ -45,24 +44,16 @@ public class Gardener extends RobotPlayer {
                  * build robots
                  */
                 
-                // move
-                if (rc.getLocation().distanceTo(archonLoc) < 5.0)
-                	tryMove(towardsArchon.opposite());
-                else
-                	tryMove(randomDirection());
-
                 // water
                 TreeInfo[] nearbyTrees = rc.senseNearbyTrees();
-                if(nearbyTrees.length > 0 && rc.canWater(nearbyTrees[0].location)) {
+                if(nearbyTrees.length > 0 && rc.canWater(nearbyTrees[0].location) && nearbyTrees[0].getHealth() < nearbyTrees[0].getMaxHealth() - 5.0) {
                     rc.water(nearbyTrees[0].location);
-                    //test
-                    System.out.println("Just watered: " + rc.canBuildRobot(RobotType.SOLDIER, randomDirection()));
                 }
 
                 // Build a soldier
                 if (rc.hasRobotBuildRequirements(RobotType.SOLDIER)) {
-                	if (rc.canBuildRobot(RobotType.SOLDIER, towardsArchon.opposite())) {
-                		rc.buildRobot(RobotType.SOLDIER, towardsArchon.opposite());
+                	if (rc.canBuildRobot(RobotType.SOLDIER, towardsArchon)) {
+                		rc.buildRobot(RobotType.SOLDIER, towardsArchon);
                 	} else {
                 		Direction randomDirBuild = randomDirection();
                 		while (!rc.canBuildRobot(RobotType.SOLDIER, randomDirBuild))
@@ -71,16 +62,23 @@ public class Gardener extends RobotPlayer {
                 	}
                 	Broadcast.incrementSoldierCount();
                 }
-                
+
                 // plant
-                Direction dir = randomDirection();
-                if(rc.hasTreeBuildRequirements() && rc.canPlantTree(dir) && Math.random() < .1) {
-                    rc.plantTree(dir);
+                if(rc.hasTreeBuildRequirements() && rc.canPlantTree(towardsArchon)) {
+                    rc.plantTree(towardsArchon);
+                    tryMove(towardsArchon.opposite());
+                    treeSize++;
                 }
-
+                
+                // move
+                if (rc.getLocation().distanceTo(archonLoc) > 5.0)
+                	tryMove(towardsArchon.opposite());
+                
+                /*
                 if (rc.getTeamBullets() >= 200) 
-                	rc.donate(10);
+                	rc.donate(10); */
 
+                // end turn
                 Clock.yield();
 
             } catch (Exception e) {

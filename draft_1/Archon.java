@@ -205,7 +205,7 @@ public class Archon extends RobotPlayer {
                     }
                 }
                 
-                //tryMove(randomDirection());
+                tryMove(randomDirection());
 
                 Clock.yield();
 
