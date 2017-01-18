@@ -26,14 +26,13 @@ public class Gardener extends RobotPlayer {
 
                 // Generate a random direction
                 Direction towardsArchon = new Direction((float)Math.atan((archonLoc.x-rc.getLocation().x)/(archonLoc.y-rc.getLocation().y)));
-                
-                if (init) {
-                	for (int i=0; i<5; i++) {
-                		if (!tryMove(towardsArchon.opposite()))
-                			tryMove(randomDirection());
-                		Clock.yield();
-                	}
-                	init = false;
+                // Randomly attempt to build a soldier or lumberjack in this direction
+                if (rc.hasRobotBuildRequirements(RobotType.SOLDIER) && rc.canBuildRobot(RobotType.SOLDIER, towardsArchon.opposite()) && Math.random() < .8) {
+                    Broadcast.incrementSoldierCount();
+                    rc.buildRobot(RobotType.SOLDIER, towardsArchon.opposite());
+                }
+                if (rc.hasRobotBuildRequirements(RobotType.LUMBERJACK) && rc.canBuildRobot(RobotType.LUMBERJACK, towardsArchon.opposite()) && Math.random() < .1 && rc.isBuildReady()) {
+                   rc.buildRobot(RobotType.LUMBERJACK, towardsArchon.opposite());
                 }
                 
                 /*
@@ -88,6 +87,5 @@ public class Gardener extends RobotPlayer {
                 e.printStackTrace();
             }
         }
-
     }
 }
