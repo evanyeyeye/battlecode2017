@@ -3,14 +3,14 @@ import battlecode.common.*;
 
 public class Gardener extends RobotPlayer {
 
+	static TreeInfo[] plantedOwner = new TreeInfo[100];
+	
     public static void run(RobotController rc) throws GameActionException {
 
+    	System.out.println("Gardener Spawn: " + rc.getID());
+    	
         RobotPlayer.rc = rc;
         initDirList();
-
-        System.out.println("Gardener Spawn: " + rc.getID());
-
-        boolean hasSpawnedScout = false;
 
         while (true) {
 

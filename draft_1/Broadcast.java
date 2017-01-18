@@ -167,6 +167,11 @@ public class Broadcast {
 
     }
 
+    /*
+     * Unit Counting
+     */
+    
+    // Gardeners
     public static void incrementGardenerCount() throws GameActionException {
         incrementGardenerCount(1);
     }
@@ -179,6 +184,7 @@ public class Broadcast {
         return rc.readBroadcast(GARDENER_COUNT_INDEX);
     }
 
+    // Soldiers
     public static void incrementSoldierCount() throws GameActionException {
         incrementSoldierCount(1);
     }
@@ -190,5 +196,5 @@ public class Broadcast {
     public static int getSoldierCount() throws GameActionException {
         return rc.readBroadcast(SOLDIER_COUNT_INDEX);
     }
-
+    
 }

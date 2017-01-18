@@ -122,11 +122,10 @@ public class Archon extends RobotPlayer {
 
     public static void run(RobotController rc) throws GameActionException {
 
+    	System.out.println("Archon Spawn: " + rc.getID());
+    	
         RobotPlayer.rc = rc;
         initDirList();
-        boolean hasHiredGardener = false;
-
-        System.out.println("Archon Spawn: " + rc.getID());
 
         for(int i = 500; i<1000; i++) {
             unusedIDs.add(i);
@@ -142,20 +141,18 @@ public class Archon extends RobotPlayer {
                 // rc.broadcast(Broadcast.ARCHON_IN_DISTRESS, 1);
 
                 main_archon = main_archon || Broadcast.checkMainArchon();
-                if(main_archon) {
+                if (main_archon) {
                     fulfillIDRequests();
                     fulfillReinforcementsRequests();
                 }
                 
+                // Build gardeners 
                 Direction dir = randomDirection();
 
-                // build gardeners
-                if(rc.hasRobotBuildRequirements(RobotType.GARDENER) && rc.canHireGardener(dir) && !hasHiredGardener) {
+                if(rc.hasRobotBuildRequirements(RobotType.GARDENER) && rc.canHireGardener(dir)) {
                 	rc.hireGardener(dir);
-                	hasHiredGardener = true;
-                } else if (rc.hasRobotBuildRequirements(RobotType.GARDENER) && rc.canHireGardener(dir) && Math.random() < .5) {
-                    rc.hireGardener(dir);
-                }
+                } 
+                
                 MapLocation archonLocation = rc.getLocation();
 
                 float x = 0.0f;

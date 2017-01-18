@@ -5,10 +5,11 @@ public strictfp class RobotPlayer {
 
     static RobotController rc;
 
-    static MapLocation[] initialEnemyArchonLocations;
+    static MapLocation[] enemyArchonLocations = rc.getInitialArchonLocations(rc.getTeam().opponent());
 
     static MapLocation archonLoc;
-    static Direction[] dirList = new Direction[8];
+    
+    static Direction[] dirList = new Direction[9];
 
     @SuppressWarnings("unused")
     public static void run(RobotController rc) throws GameActionException {
@@ -39,8 +40,8 @@ public strictfp class RobotPlayer {
      * Initializes list of every pi/4 radian directions
      */
     public static void initDirList() {
-    	for (int i=0; i<dirList.length; i++)
-    		dirList[i] = new Direction((float)(2 * Math.PI * ((float)i) / dirList.length));
+    	for (int i=1; i<dirList.length; i++)
+    		dirList[i] = new Direction((float)(2 * Math.PI * ((float)(i-1)) / dirList.length));
     }
 
     /**
