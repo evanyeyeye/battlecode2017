@@ -20,8 +20,11 @@ public class Gardener extends RobotPlayer {
             try {
 
                 // Listen for home archon's location
-                archonLoc = new MapLocation(rc.readBroadcast(0), rc.readBroadcast(1));
+                int xPos = rc.readBroadcast(0);
+                int yPos = rc.readBroadcast(1);
+                archonLoc = new MapLocation(xPos,yPos);
 
+                // Generate a random direction
                 Direction towardsArchon = new Direction((float)Math.atan((archonLoc.x-rc.getLocation().x)/(archonLoc.y-rc.getLocation().y)));
                 
                 if (init) {

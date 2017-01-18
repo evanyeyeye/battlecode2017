@@ -14,6 +14,7 @@ public strictfp class RobotPlayer {
     @SuppressWarnings("unused")
     public static void run(RobotController rc) throws GameActionException {
         Broadcast.initBroadcaster(rc);
+        Direct.initDirector(rc);
         switch (rc.getType()) {
             case ARCHON:
                 Archon.run(rc);
