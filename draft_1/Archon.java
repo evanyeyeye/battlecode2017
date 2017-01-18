@@ -134,6 +134,8 @@ public class Archon extends RobotPlayer {
             dynamicIDs_unallocated.add(i);
         }
 
+        enemyArchonLocations = rc.getInitialArchonLocations(rc.getTeam().opponent());
+        
         while (true) {
             try {
 
@@ -147,11 +149,10 @@ public class Archon extends RobotPlayer {
                 }
                 
                 // Build gardeners 
-                Direction dir = randomDirection();
+                Direction dir = rc.getLocation().directionTo(enemyArchonLocations[0]);
 
-                // keep outer if statement, ima add something - evan
                 if (rc.hasRobotBuildRequirements(RobotType.GARDENER) && rc.canHireGardener(dir)
-                		&& (Broadcast.getGardenerCount() <= Broadcast.getSoldierCount() || rc.getTeamBullets() > 125)) {
+                		&& Broadcast.getGardenerCount() <= Broadcast.getSoldierCount() * 2 / 3) {
             		rc.hireGardener(dir);
             		Broadcast.incrementGardenerCount();
                 }
@@ -203,6 +204,8 @@ public class Archon extends RobotPlayer {
                                         Float.intBitsToFloat(main_archon_y))));
                     }
                 }
+                
+                //tryMove(randomDirection());
 
                 Clock.yield();
 

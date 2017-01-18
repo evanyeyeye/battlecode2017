@@ -43,14 +43,11 @@ public class Gardener extends RobotPlayer {
                  */
                 
                 // move
-                if (rc.getLocation().distanceTo(archonLoc) < 5.0 && !tryMove(towardsArchon.opposite()))
+                if (rc.getLocation().distanceTo(archonLoc) < 5.0)
+                	tryMove(towardsArchon.opposite());
+                else
                 	tryMove(randomDirection());
-                
-                Direction dir = randomDirection();
-                if(rc.canPlantTree(dir) && Broadcast.getSoldierCount() >= Broadcast.getGardenerCount()) {
-                    rc.plantTree(dir);
-                }
-                
+
                 // water
                 TreeInfo[] nearbyTrees = rc.senseNearbyTrees();
                 if(nearbyTrees.length > 0 && rc.canWater(nearbyTrees[0].location)) {
@@ -70,6 +67,12 @@ public class Gardener extends RobotPlayer {
                 		rc.buildRobot(RobotType.SOLDIER, randomDirBuild);
                 	}
                 	Broadcast.incrementSoldierCount();
+                }
+                
+                // plant
+                Direction dir = randomDirection();
+                if(rc.hasTreeBuildRequirements() && rc.canPlantTree(dir) && Math.random() < .05) {
+                    rc.plantTree(dir);
                 }
 
                 if (rc.getTeamBullets() >= 200) 
