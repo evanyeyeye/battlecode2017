@@ -204,7 +204,9 @@ public class Archon extends RobotPlayer {
                     }
                 }
                 
-                tryMove(randomDirection());
+                //tryMove(randomDirection());
+                if(rc.getTeamBullets() > 200.0)
+                    rc.donate((float) 20.0);
 
                 Clock.yield();
 
