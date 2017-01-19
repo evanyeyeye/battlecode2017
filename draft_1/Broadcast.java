@@ -218,4 +218,16 @@ public class Broadcast {
         return rc.readBroadcast(SOLDIER_COUNT_INDEX);
     }
     
+    public static void incrementScoutCount() throws GameActionException {
+        incrementScoutCount(1);
+    }
+
+    public static void incrementScoutCount(int num) throws GameActionException {
+        rc.broadcast(SCOUT_COUNT_INDEX, rc.readBroadcast(SCOUT_COUNT_INDEX) + num);
+    }
+
+    public static int getScoutCount() throws GameActionException {
+        return rc.readBroadcast(SCOUT_COUNT_INDEX);
+    }
+    
 }

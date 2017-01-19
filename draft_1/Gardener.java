@@ -80,10 +80,16 @@ public class Gardener extends RobotPlayer {
                 Direction towardsArchon = myLocation.directionTo(archonLoc);
                 
                 // Randomly attempt to build a soldier
+                if ((init || Math.random() < 0.3) && rc.hasRobotBuildRequirements(RobotType.SCOUT) && rc.canBuildRobot(RobotType.SCOUT, towardsArchon.opposite())) {
+                    rc.buildRobot(RobotType.SCOUT, towardsArchon.opposite());
+                    Broadcast.incrementScoutCount();
+                    init = false;
+                }
                 if (rc.hasRobotBuildRequirements(RobotType.SOLDIER) && rc.canBuildRobot(RobotType.SOLDIER, towardsArchon.opposite())) {
                     rc.buildRobot(RobotType.SOLDIER, towardsArchon.opposite());
                     Broadcast.incrementSoldierCount();
                 }
+                
                 
                 // Move
                 if (treeSize < 4) {

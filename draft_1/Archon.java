@@ -162,7 +162,7 @@ public class Archon extends RobotPlayer {
                 // Build gardeners 
                 Direction dir = rc.getLocation().directionTo(enemyArchonLocations[0]);
 
-                if (rc.hasRobotBuildRequirements(RobotType.GARDENER) && rc.canHireGardener(dir) && Math.random() < .4) {
+                if (rc.hasRobotBuildRequirements(RobotType.GARDENER) && rc.canHireGardener(dir)) {
             		rc.hireGardener(dir);
             		Broadcast.incrementGardenerCount();
                 }
@@ -237,7 +237,7 @@ public class Archon extends RobotPlayer {
                 }
                 
                 //tryMove(randomDirection());
-                if(rc.getTeamBullets() > 200.0)
+                if(rc.getTeamBullets() > 10000.0)
                     rc.donate((float) 20.0);
 
                 Clock.yield();
