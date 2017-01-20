@@ -33,7 +33,6 @@ public class Direct {
     }
 
     public static boolean retreat(){
-        RobotInfo[] robots = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
-        return robots.length > 4;
+        return rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent()).length > rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam()).length;
     }
 }

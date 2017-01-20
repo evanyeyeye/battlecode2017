@@ -3,6 +3,10 @@ import battlecode.common.*;
 
 public class Soldier extends RobotPlayer {
 
+    static final int MAX_HP = 50;
+
+    static boolean dying = false;
+
     static int ID = 0;
 
     /*
@@ -27,16 +31,17 @@ public class Soldier extends RobotPlayer {
 
         System.out.println("I'm a soldier!");
         Team enemy = rc.getTeam().opponent();
+        Team ally  = rc.getTeam();
 
         // The code you want your robot to perform every round should be in this loop
         while (true) {
 
-            if(ID < 500) {
-                ID = Broadcast.requestID(ID);
-            }
-
             // Try/catch blocks stop unhandled exceptions, which cause your robot to explode
             try {
+
+                if(ID < 500 && !dying) {
+                    ID = Broadcast.requestID(ID);
+                }
 
 
                 float archon_x = Float.intBitsToFloat(rc.readBroadcast(
@@ -47,11 +52,23 @@ public class Soldier extends RobotPlayer {
                 MapLocation myLocation = rc.getLocation();
 
                 MapLocation archonLocation = new MapLocation(archon_x, archon_y);
-                if(Broadcast.checkMainArchonDistress()) {
-                    tryMove(myLocation.directionTo(archonLocation));
+                float distanceToArchon = myLocation.distanceTo(archonLocation);
+                if(Broadcast.checkMainArchonDistress() || dying) {
+                    if(distanceToArchon > 15) {
+                        tryMove(myLocation.directionTo(archonLocation));
+                    }
+                }
+
+                // Read instructions but immediately broadcast death notice
+                if(rc.getHealth() < MAX_HP/10) {
+                    // Revoke ID
+                    Broadcast.dying(ID);
+                    dying = true;
+                    ID = -ID;
                 }
 
                 if(ID > 500) {
+
                     int code = rc.readBroadcast(ID);
                     // code <= 0 means the action has been disabled
                     // or no action has been transmitted
@@ -64,9 +81,9 @@ public class Soldier extends RobotPlayer {
                         int type = coordinates[2];
                         switch(type) {
                             case REINFORCE:
-                                // if(Direct.retreat())
-                                //     tryMove(myLocation.directionTo(archonLocation));
-                                // else {
+                                if(Direct.retreat())
+                                    tryMove(myLocation.directionTo(archonLocation));
+                                else {
                                     System.out.println("Responding to reinforcement request at: " + x_f +  " " + y_f);
                                     MapLocation requestedLocation = new MapLocation(x_f, y_f);
 
@@ -79,53 +96,120 @@ public class Soldier extends RobotPlayer {
                                     } catch(Exception e) {
                                         System.out.println("EXCEPTION: TRIED TO MOVE TO: " + x_f + " " + y_f);
                                     }
-                                // }
+                                }
                                 break;
                         }
                     }
                 }
 
                 // See if there are any nearby enemy robots
-                RobotInfo[] robots = rc.senseNearbyRobots(-1, enemy);
+                RobotInfo[] robots = rc.senseNearbyRobots(rc.getType().sensorRadius, enemy);
+                RobotInfo[] friendlies = rc.senseNearbyRobots(rc.getType().sensorRadius, ally);
 
                 // If there are some...
                 if (robots.length > 0) {
                     // And we have enough bullets, and haven't attacked yet this turn...
                     Broadcast.requestReinforcements(myLocation);
-                    if (rc.canFireTriadShot()) {
+                    if(distanceToArchon < 25) {
+                        Broadcast.alertArchon(myLocation);
+                    }
+                    if (Direct.retreat() && rc.canFirePentadShot()) {
+                    	boolean shoot = true;
+                        Direction towardsEn = null;
+                        for(RobotInfo en : robots) {
+                            towardsEn = myLocation.directionTo(en.location);
+                            if(myLocation.distanceTo(en.location) < 4) {
+                                rc.firePentadShot(towardsEn);
+                                break;
+                            }
+                            for(RobotInfo friendly : friendlies) {
+                                if(myLocation.directionTo(friendly.location).degreesBetween(towardsEn) < 50) {
+                                    shoot = false;
+                                    break;
+                                }
+                            }
+                            if(shoot && towardsEn != null) {
+                                rc.firePentadShot(towardsEn);
+                                tryMove(towardsEn.opposite());
+                                break;
+                            }
+                        }
+                        if(!shoot && towardsEn != null) {
+                            tryMove(towardsEn);
+                        }
+                    }
+                   	else if (friendlies.length > robots.length * 2 && rc.canFireSingleShot()) {
+                   		boolean shoot = true;
+                        Direction towardsEn = null;
+                        for(RobotInfo en : robots) {
+                            towardsEn = myLocation.directionTo(en.location);
+                            if(myLocation.distanceTo(en.location) < 4) {
+                                rc.fireSingleShot(towardsEn);
+                                break;
+                            }
+                            for(RobotInfo friendly : friendlies) {
+                                if(myLocation.directionTo(friendly.location).degreesBetween(towardsEn) < 50) {
+                                    shoot = false;
+                                    break;
+                                }
+                            }
+                            if(shoot && towardsEn != null) {
+                                rc.fireSingleShot(towardsEn);
+                                tryMove(towardsEn.opposite());
+                                break;
+                            }
+                        }
+                        if(!shoot && towardsEn != null) {
+                            tryMove(towardsEn);
+                        }
+                   	}
+                    else if (rc.canFireTriadShot()) {
                         // ...Then fire a bullet in the direction of the enemy.
-                        rc.fireTriadShot(rc.getLocation().directionTo(robots[0].location));
-                        tryMove(rc.getLocation().directionTo(robots[0].location).opposite());
+                        boolean shoot = true;
+                        Direction towardsEn = null;
+                        for(RobotInfo en : robots) {
+                            towardsEn = myLocation.directionTo(en.location);
+                            if(myLocation.distanceTo(en.location) < 4) {
+                                rc.fireTriadShot(towardsEn);
+                                break;
+                            }
+                            for(RobotInfo friendly : friendlies) {
+                                if(myLocation.directionTo(friendly.location).degreesBetween(towardsEn) < 50) {
+                                    shoot = false;
+                                    break;
+                                }
+                            }
+                            if(shoot && towardsEn != null) {
+                                rc.fireTriadShot(towardsEn);
+                                tryMove(towardsEn.opposite());
+                                break;
+                            }
+                        }
+                        if(!shoot && towardsEn != null) {
+                            tryMove(towardsEn);
+                        }
                     }
                 }
                 //Direction towardsArchon = new Direction((float)Math.atan((archonLoc.x-rc.getLocation().x)/(archonLoc.y-rc.getLocation().y)));
                 // Move randomly
                 //tryMove(towardsArchon.opposite());
-                tryMove(randomDirection());
+                if(Direct.retreat())
+                    tryMove(myLocation.directionTo(archonLocation));
+                else {
+                    if(!Broadcast.anyReinforcementsRequests()) {
+                        if(distanceToArchon < 30) {
+                            int len = RobotPlayer.enemyArchonLocations.length;
+                            if(len > 0) {
+                                int index = (int)(Math.random() * len);
+                                tryMove(myLocation.directionTo(RobotPlayer.enemyArchonLocations[index]));
+                            }
+                        } else {
+                            tryMove(myLocation.directionTo(archonLocation));
+                        }
+                    }
+                }
 
                 Clock.yield();
-                
-                
-                /*
-                //MapLocation myLocation = rc.getLocation();
-                //Direction towardsArchon = new Direction((float) Math.atan((archonLoc.x-myLocation.x)/(archonLoc.y-myLocation.y)));
-                // See if there are any nearby enemy robots
-                RobotInfo[] robots = rc.senseNearbyRobots(-1, enemy);
-                // If there are some...
-                if (robots.length > 0) {
-                    // And we have enough bullets, and haven't attacked yet this turn...
-                    if (rc.canFireTriadShot()) {
-                        // ...Then fire a bullet in the direction of the enemy.
-                        rc.fireTriadShot(rc.getLocation().directionTo(robots[0].location));
-                        tryMove(rc.getLocation().directionTo(robots[0].location).opposite());
-                    } else {
-                        tryMove(rc.getLocation().directionTo(robots[0].location));
-                    }
-                } else {
-                    tryMove(randomDirection());
-                }
-                // Clock.yield() makes the robot wait until the next turn, then it will perform this loop again
-                Clock.yield();*/
 
             } catch (Exception e) {
                 System.out.println("Soldier Exception");

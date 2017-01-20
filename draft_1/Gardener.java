@@ -3,7 +3,9 @@ import battlecode.common.*;
 
 public class Gardener extends RobotPlayer {
 
-	static TreeInfo[] plantedOwner = new TreeInfo[100];
+    static final int MAX_HP = 40;
+
+	static TreeInfo[] plantedOwner = new TreeInfo[4];
 	static int treeIndex = 0;
 	static int treeSize = 0;
 	
@@ -22,7 +24,8 @@ public class Gardener extends RobotPlayer {
             try {
 
                 // Listen for home archon's location
-                archonLoc = new MapLocation(rc.readBroadcast(0), rc.readBroadcast(1));
+                float archonCoords[] = Broadcast.getArchonLocation();
+                archonLoc = new MapLocation(archonCoords[0], archonCoords[1]);
 
                 /*
                 Direction towardsArchon = rc.getLocation().directionTo(archonLoc);
@@ -70,49 +73,66 @@ public class Gardener extends RobotPlayer {
                     rc.plantTree(towardsArchon);
                     tryMove(towardsArchon.opposite());
                     treeSize++;
-                }
-                
-                // move
-                if (rc.getLocation().distanceTo(archonLoc) > 5.0)
-                	tryMove(towardsArchon.opposite());
-                
-                /*
-                if (rc.getTeamBullets() >= 200) 
-                	rc.donate(10); */
+                }*/
+              
 
+                MapLocation myLocation = rc.getLocation();
+                Direction towardsArchon = myLocation.directionTo(archonLoc);
                 
                 // end turn
 
                 rc.broadcast(((int)Math.random() * 1000), 10);
-                // Generate a random direction
-                Direction towardsArchon = rc.getLocation().directionTo(archonLoc);
+
                 // Randomly attempt to build a soldier
-                if (rc.hasRobotBuildRequirements(RobotType.SOLDIER) && rc.canBuildRobot(RobotType.SOLDIER, towardsArchon.opposite()) && Math.random() < .8) {
+                if ((init || Math.random() < 0.3) && rc.hasRobotBuildRequirements(RobotType.SCOUT) && rc.canBuildRobot(RobotType.SCOUT, towardsArchon.opposite())) {
+                    rc.buildRobot(RobotType.SCOUT, towardsArchon.opposite());
+                    Broadcast.incrementScoutCount();
+                    init = false;
+                }
+                if (rc.hasRobotBuildRequirements(RobotType.SOLDIER) && rc.canBuildRobot(RobotType.SOLDIER, towardsArchon.opposite())) {
                     rc.buildRobot(RobotType.SOLDIER, towardsArchon.opposite());
+                    Broadcast.incrementSoldierCount();
                 }
                 
-                // Move randomly
-                if(!tryMove(towardsArchon)) {
-                    tryMove(randomDirection());
-                }
-                /*if(rc.canBuildRobot(RobotType.SOLDIER, towardsArchon.opposite())) {
-                    rc.buildRobot(RobotType.SOLDIER, towardsArchon.opposite());
-                }*/
-                Direction dir = randomDirection();
-                if(rc.canPlantTree(dir) && Math.random() < 0.2) {
-                    rc.plantTree(dir);
-                }
-                TreeInfo[] trees = rc.senseNearbyTrees();
-                if(trees.length > 0 && rc.canWater(trees[0].location) && Math.random() < 0.3) {
-                    rc.water(trees[0].location);
-                    //rc.shake(trees[0].location);
-                    /*if(rc.getTeamBullets() > 100.0) {
-                        rc.donate((float) 10.0);
-                    }*/
-                }
                 
-                if (rc.getTeamBullets() >= 200) 
-                	rc.donate(10);
+                // Move
+                if (treeSize < 4) {
+		            float dist = myLocation.distanceTo(archonLoc);
+		            if(dist < 14) {
+		                tryMove(towardsArchon.opposite());
+		            } else {
+		                if(dist < 20 || !tryMove(towardsArchon)) {
+		                    tryMove(randomDirection());
+		                }
+		            }
+		        } else if (!tryMove(rc.getLocation().directionTo(plantedOwner[treeIndex].getLocation()))) {
+	        		tryMove(randomDirection());
+	        	}
+
+                if(!Broadcast.anyReinforcementsRequests()) {
+                    Direction dir = randomDirection();
+                    if( rc.canPlantTree(dir) && (treeSize * Broadcast.getGardenerCount() < Broadcast.getSoldierCount()) && treeSize < 4) {
+                        rc.plantTree(dir);
+                        TreeInfo[] trees = rc.senseNearbyTrees();
+                        if (trees.length > 0)
+                        	plantedOwner[treeIndex] = trees[0];
+                        treeIndex = (treeIndex + 1) % treeSize;
+                        treeSize++;
+                    }
+                }
+
+                if (treeSize < 4) {
+		            TreeInfo[] trees = rc.senseNearbyTrees();
+		            if(trees.length > 0 && rc.canWater(trees[0].location)) {
+		                rc.water(trees[0].location);
+		            }
+		        } else {
+		        	if(rc.canWater(plantedOwner[treeIndex].location)) {
+		                rc.water(plantedOwner[treeIndex].location);
+		                treeIndex = (treeIndex + 1) % treeSize;
+		            } else if (rc.getLocation().distanceTo(plantedOwner[treeIndex].location) < .5)
+		            	treeIndex = (treeIndex + 1) % treeSize;
+		        }
                 
                 Clock.yield();
 

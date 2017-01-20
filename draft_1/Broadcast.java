@@ -5,7 +5,8 @@ public class Broadcast {
 
     static RobotController rc;
 
-    public static int REINFORCEMENTS_FULFILL_TIME = 10;
+    final public static int REINFORCEMENTS_FULFILL_TIME = 10;
+    final public static int DYING = -666;
 
     /*
      * BEGIN INDEX ALLOCATION
@@ -167,6 +168,26 @@ public class Broadcast {
 
     }
 
+    public static boolean anyReinforcementsRequests() throws GameActionException {
+        for(int i : REINFORCEMENTS_REQUESTS) {
+            if(rc.readBroadcast(i) > 0) return true;
+        }
+        return false;
+    }
+
+    public static float[] getArchonLocation() throws GameActionException {
+        float coordinates[] = {
+            Float.intBitsToFloat(rc.readBroadcast(0)),
+            Float.intBitsToFloat(rc.readBroadcast(1))
+        };
+        return coordinates;
+    }
+
+    public static void dying(int ID) throws GameActionException {
+		if(ID >= 500 && ID < 1000)
+			rc.broadcast(ID, DYING);
+    }
+
     /*
      * Unit Counting
      */
@@ -195,6 +216,18 @@ public class Broadcast {
 
     public static int getSoldierCount() throws GameActionException {
         return rc.readBroadcast(SOLDIER_COUNT_INDEX);
+    }
+    
+    public static void incrementScoutCount() throws GameActionException {
+        incrementScoutCount(1);
+    }
+
+    public static void incrementScoutCount(int num) throws GameActionException {
+        rc.broadcast(SCOUT_COUNT_INDEX, rc.readBroadcast(SCOUT_COUNT_INDEX) + num);
+    }
+
+    public static int getScoutCount() throws GameActionException {
+        return rc.readBroadcast(SCOUT_COUNT_INDEX);
     }
     
 }

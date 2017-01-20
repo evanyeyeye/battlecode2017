@@ -6,6 +6,8 @@ import java.util.Iterator;
 
 public class Archon extends RobotPlayer {
 
+    static final int MAX_HP = 400;
+
     static MapLocation[] corners = new MapLocation[4];
 
     static HashSet<Integer> unusedIDs = new HashSet<Integer>();
@@ -105,8 +107,17 @@ public class Archon extends RobotPlayer {
             int sl = (int)(Math.random() * num_requests);
 
             // If the same request hasn't been fulfilled
-            if(rc.readBroadcast(robot) != -1 * reinforcements_slots[sl]) {
-                rc.broadcast(robot, reinforcements_slots[sl]);
+            int current_code = rc.readBroadcast(robot);
+            if(current_code == Broadcast.DYING) {
+                System.out.println("Revoking ID of dying robot: " + robot);
+                System.out.println("Rest in peace my friend");
+                unusedIDs.add(robot);
+                usedIDs.remove(robot);
+                rc.broadcast(robot, 0);
+            } else {
+                if(current_code != -1 * reinforcements_slots[sl]) {
+                    rc.broadcast(robot, reinforcements_slots[sl]);
+                }
             }
         }
 
@@ -166,13 +177,33 @@ public class Archon extends RobotPlayer {
                 float enemyDistance;
                 MapLocation closestEnemy = null;
                 MapLocation enemyLocation;
+
+                Team enemy = rc.getTeam().opponent();
+                RobotInfo[] enemies = rc.senseNearbyRobots(-1, enemy);
+
+                for(RobotInfo en : enemies) {
+                    enemyLocation = en.location;
+                    enemyDistance = enemyLocation.distanceSquaredTo(archonLocation);
+                    if(closestEnemy == null || enemyDistance < closestDistance) {
+                        closestDistance = enemyDistance;
+                        closestEnemy = enemyLocation;
+                    }
+                }
+
+                boolean setBySelf = closestEnemy != null;
+
                 for(int i : Broadcast.ARCHON_AVOID_ROBOTS) {
                     age = rc.readBroadcast(i);
                     if(age <= 0) continue;
 
+                    rc.broadcast(i, age+1);
+
+                    // Ignore other warnings because we
+                    // prefer our own warnings
+                    if(setBySelf) continue;
+
                     x = Float.intBitsToFloat(rc.readBroadcast(i+1));
                     y = Float.intBitsToFloat(rc.readBroadcast(i+2));
-                    rc.broadcast(i, age+1);
 
                     enemyLocation = new MapLocation(x,y);
                     enemyDistance = archonLocation.distanceSquaredTo(enemyLocation);
@@ -188,6 +219,7 @@ public class Archon extends RobotPlayer {
 
                 // Broadcast archon's location for other robots on the team to know
                 if(main_archon) {
+                    System.out.println("Broadcasting location: " + archonLocation.x + " " + archonLocation.y);
                     rc.broadcast(0,Float.floatToRawIntBits(archonLocation.x));
                     rc.broadcast(1,Float.floatToRawIntBits(archonLocation.y));
                 } else {
@@ -200,9 +232,10 @@ public class Archon extends RobotPlayer {
                                         Float.intBitsToFloat(main_archon_y))));
                     }
                 }
-                
-                tryMove(randomDirection());
-                
+
+                if(rc.getTeamBullets() > 10000.0)
+                    rc.donate((float) 20.0);
+
                 Clock.yield();
 
             } catch (Exception e) {
