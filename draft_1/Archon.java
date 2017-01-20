@@ -136,7 +136,6 @@ public class Archon extends RobotPlayer {
     	System.out.println("Archon Spawn: " + rc.getID());
     	
         RobotPlayer.rc = rc;
-        initDirList();
 
         for(int i = 500; i<1000; i++) {
             unusedIDs.add(i);
@@ -160,11 +159,11 @@ public class Archon extends RobotPlayer {
                 }
                 
                 // Build gardeners 
-                Direction dir = rc.getLocation().directionTo(enemyArchonLocations[0]);
+                Direction dir = randomDirection();
 
-                if (rc.hasRobotBuildRequirements(RobotType.GARDENER) && rc.canHireGardener(dir)) {
+                if (rc.canHireGardener(dir)) {
             		rc.hireGardener(dir);
-            		Broadcast.incrementGardenerCount();
+            		Broadcast.incrementRobotCount(RobotType.GARDENER);
                 }
                 
                 MapLocation archonLocation = rc.getLocation();
@@ -233,13 +232,12 @@ public class Archon extends RobotPlayer {
                     }
                 }
 
-                if(rc.getTeamBullets() > 10000.0)
-                    rc.donate((float) 20.0);
+                if (rc.getTeamBullets() > 10000.0)
+                    rc.donate(rc.getTeamBullets()); // If over 10000 bullets, we win. 
 
                 Clock.yield();
 
             } catch (Exception e) {
-                System.out.println("Archon Exception");
                 e.printStackTrace();
             }
         }

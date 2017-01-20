@@ -3,8 +3,6 @@ import battlecode.common.*;
 
 public class Soldier extends RobotPlayer {
 
-    static final int MAX_HP = 50;
-
     static boolean dying = false;
 
     static int ID = 0;
@@ -25,11 +23,10 @@ public class Soldier extends RobotPlayer {
     // [500,999] == ID established
 
     public static void run(RobotController rc) throws GameActionException {
-        RobotPlayer.rc = rc;
-        initDirList();
-
-
-        System.out.println("I'm a soldier!");
+        
+    	RobotPlayer.rc = rc;
+    	System.out.println("Soldier: Spawn");
+    	
         Team enemy = rc.getTeam().opponent();
         Team ally  = rc.getTeam();
 
@@ -60,9 +57,10 @@ public class Soldier extends RobotPlayer {
                 }
 
                 // Read instructions but immediately broadcast death notice
-                if(rc.getHealth() < MAX_HP/10) {
+                if (rc.getHealth() < rc.getType().maxHealth / 10) {
                     // Revoke ID
                     Broadcast.dying(ID);
+                    Broadcast.decrementRobotCount(RobotType.SOLDIER);
                     dying = true;
                     ID = -ID;
                 }
@@ -212,7 +210,7 @@ public class Soldier extends RobotPlayer {
                 Clock.yield();
 
             } catch (Exception e) {
-                System.out.println("Soldier Exception");
+                System.out.println("Soldier: Exception");
                 e.printStackTrace();
             }
         }

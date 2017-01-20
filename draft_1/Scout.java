@@ -96,7 +96,6 @@ public class Scout extends RobotPlayer {
 	
     public static void run(RobotController rc) {
         RobotPlayer.rc = rc;
-        initDirList();
 
         System.out.println("I'm a scout!");
         Team enemy = rc.getTeam().opponent();

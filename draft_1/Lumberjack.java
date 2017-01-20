@@ -3,11 +3,8 @@ import battlecode.common.*;
 
 public class Lumberjack extends RobotPlayer {
 
-    static final int MAX_HP = 50;
-
     public static void run(RobotController rc) {
         RobotPlayer.rc = rc;
-        initDirList();
 
         System.out.println("I'm a lumberjack!");
         Team enemy = rc.getTeam().opponent();

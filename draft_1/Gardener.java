@@ -2,145 +2,159 @@ package draft_1;
 import battlecode.common.*;
 
 public class Gardener extends RobotPlayer {
-
-    static final int MAX_HP = 40;
-
-	static TreeInfo[] plantedOwner = new TreeInfo[4];
-	static int treeIndex = 0;
-	static int treeSize = 0;
-	
+    
+    /*
+     * TODO: dynamic building of trees
+     * Initiate gardener building sequence
+     * @return array of directions
+     */
+    public static Direction[] createBuildDirSequence() throws GameActionException {
+    	
+    	Direction[] dirSequence = new Direction[6]; // hexagonal structure 
+   
+    	if (rc.getTeam() == Team.A) // Team A usually faces right 
+	    	for (int i=0; i<dirSequence.length; i++)
+	    		dirSequence[i] = new Direction((float)(Math.PI / 3 * (i+1)));
+    	else if (rc.getTeam() == Team.B) // and Team B usually faces right 
+	    	for (int i=0; i<dirSequence.length; i++)
+	    		dirSequence[i] = new Direction((float)((2 * Math.PI / 3) - (i * Math.PI / 3)));
+    	
+    	return dirSequence;
+    }
+    
+    /*
+     * Builds a robot
+     * @param type RobotType wanted
+     * @param dir Direction from Gardener 
+     * @return true if robot can be built
+     */
+    public static boolean buildRobot(RobotType type, Direction dir) throws GameActionException {
+    	
+        if (rc.canBuildRobot(type, dir)) {
+            rc.buildRobot(type, dir);
+            Broadcast.incrementRobotCount(type);
+            return true;
+        }
+        
+        return false;
+    }
+    
+    public static boolean testHome() throws GameActionException {
+    	
+    	System.out.println("Begin Test Home");
+    	int openCount = 0; // number of directions that are not blocked by objects
+    	boolean openPath = false; // since no path finding implementation yet, I say if a path is open 2 strides in a row, there is an open path
+    	int tempSweetSpot = 6; // 6 by default, set in createBuildDirSequence()
+    	for (int i=0; i<buildSequence.length; i++) {
+			if (rc.onTheMap(rc.getLocation().add(buildSequence[i], (float)1.0), rc.getType().bodyRadius) 
+					&& !rc.isCircleOccupiedExceptByThisRobot(rc.getLocation().add(buildSequence[i], (float)1.0), rc.getType().bodyRadius)) {
+				openCount++;
+				if (!openPath) { // structured awkwardly in order to reduce expensive bytecode operations
+					openPath = !rc.isCircleOccupiedExceptByThisRobot(rc.getLocation().add(buildSequence[i], (float)2.0), rc.getType().bodyRadius);
+					if (openPath) 
+						tempSweetSpot = i; // annoying but necessary
+				}
+			} 
+			System.out.println("" + i + ": " + openCount);
+    	}
+    	
+    	if (openCount > 2 && openPath) {
+    		sweetSpot = tempSweetSpot;
+    		return true;
+    	}
+    	return false;
+    }
+    
+    public static Direction[] buildSequence; // Initiate gardener building sequence 
+    public static int sweetSpot; // Opening for robot production
+    
     public static void run(RobotController rc) throws GameActionException {
 
-        System.out.println("Gardener Spawn: " + rc.getID());
+    	RobotPlayer.rc = rc;
+    	System.out.println("Gardener: Spawn");
+    	
+        buildSequence = createBuildDirSequence();
         
-        RobotPlayer.rc = rc;
-        initDirList();
-
-        boolean init = true;
+        boolean foundHome = testHome(); // :(
         
         while (true) {
 
-            // Try/catch blocks stop unhandled exceptions, which cause your robot to explode
             try {
-
-                // Listen for home archon's location
-                float archonCoords[] = Broadcast.getArchonLocation();
-                archonLoc = new MapLocation(archonCoords[0], archonCoords[1]);
-
-                /*
-                Direction towardsArchon = rc.getLocation().directionTo(archonLoc);
-                
-                /*
-                if (init) {
-                	for (int i=0; i<5; i++) {
-                		if (!tryMove(towardsArchon.opposite()))
-                			tryMove(randomDirection());
-                		Clock.yield();
-                	}
-                	init = false;
-                } */
-                
-                /*
-                 * Processes:
-                 * ----------
-                 * move
-                 * water
-                 * plant trees
-                 * build robots
-                 */
-                
-                // water
-                /*TreeInfo[] nearbyTrees = rc.senseNearbyTrees();
-                if(nearbyTrees.length > 0 && rc.canWater(nearbyTrees[0].location) && nearbyTrees[0].getHealth() < nearbyTrees[0].getMaxHealth() - 5.0) {
-                    rc.water(nearbyTrees[0].location);
-                }
-
-                // Build a soldier
-                if (rc.hasRobotBuildRequirements(RobotType.SOLDIER)) {
-                	if (rc.canBuildRobot(RobotType.SOLDIER, towardsArchon)) {
-                		rc.buildRobot(RobotType.SOLDIER, towardsArchon);
-                	} else {
-                		Direction randomDirBuild = randomDirection();
-                		while (!rc.canBuildRobot(RobotType.SOLDIER, randomDirBuild))
-                			randomDirBuild = randomDirection();
-                		rc.buildRobot(RobotType.SOLDIER, randomDirBuild);
-                	}
-                	Broadcast.incrementSoldierCount();
-                }
-
-                // plant
-                if(rc.hasTreeBuildRequirements() && rc.canPlantTree(towardsArchon)) {
-                    rc.plantTree(towardsArchon);
-                    tryMove(towardsArchon.opposite());
-                    treeSize++;
-                }*/
               
+            	// System.out.println("Starting Loop Bytecodes: " + Clock.getBytecodeNum());
+            	
+            	TreeInfo[] neutralTrees = rc.senseNearbyTrees(rc.getType().strideRadius, Team.NEUTRAL); 
+            	for (int i=0; i<neutralTrees.length; i++)
+            		if (neutralTrees[i].getContainedBullets() > 0 && rc.canShake(neutralTrees[i].getLocation()))
+            			rc.shake(neutralTrees[i].getLocation()); // Collect free bullets from neutral trees
+	            
+            	// System.out.println("Shook Trees Bytecodes: " + Clock.getBytecodeNum());
+            	
+            	TreeInfo[] closeTrees = rc.senseNearbyTrees(rc.getType().strideRadius, rc.getTeam());
+            	if (closeTrees.length > 0) {
+            		TreeInfo treeToWater = closeTrees[0];
+            		float minHealth = closeTrees[0].getHealth();
+            		for (int i=1; i<closeTrees.length; i++)
+            			if (closeTrees[i].getHealth() < minHealth && rc.canWater(closeTrees[i].getLocation())) {
+            				treeToWater = closeTrees[i];
+            				minHealth = closeTrees[i].getHealth();
+            			}
+            		rc.water(treeToWater.getLocation()); // Water tree with lowest health
+	            }
+            	
+            	// System.out.println("Watered Trees Bytecodes: " + Clock.getBytecodeNum());
+            	
+            	if (rc.getHealth() < rc.getType().maxHealth / 10)
+            		Broadcast.decrementRobotCount(RobotType.GARDENER); // Broadcast death on low health
+            	
+            	if (!foundHome) { // escaping homelessness
+            		if (rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent()).length > 0 
+            				|| rc.senseNearbyBullets(rc.getType().bulletSightRadius).length > 0
+            				|| Broadcast.getRobotCount(RobotType.SOLDIER) < 1) // Emergency robot requirement scenarios
+            			for (int i=0; i<buildSequence.length; i++)
+            				if (buildRobot(RobotType.SOLDIER, buildSequence[i]))
+            					break;
+            		
+            		for (int i=0; i<buildSequence.length; i++) {
+            			if (rc.hasMoved())
+            				break;
+            			if (rc.isCircleOccupiedExceptByThisRobot(rc.getLocation().add(buildSequence[i], (float)1.0), rc.getType().bodyRadius) 
+            					&& rc.canMove(buildSequence[i].opposite()))
+            				rc.move(buildSequence[i].opposite());
+            		}
+            		
+            		// System.out.println("Tested Home Bytecodes: " + Clock.getBytecodeNum());
+            		
+            		foundHome = testHome();
+            		if (!testHome()) { // A little weird, but if testHome() is true than process below code without waiting for another loop.
+            			Clock.yield();
+            			continue;
+            		}
+            	}
+            	
+            	// System.out.println("Found Home Bytecodes: " + Clock.getBytecodeNum());
+            	
+            	for (int i=0; i<buildSequence.length; i++) {
+            		if (i == sweetSpot)
+            			continue;
+            		if (rc.canPlantTree(buildSequence[i]) && (rc.senseNearbyTrees(rc.getType().strideRadius, rc.getTeam()).length < 2 
+            				|| !(Broadcast.anyReinforcementsRequests() || !Broadcast.checkMainArchonDistress() 
+            				|| Broadcast.getRobotCount(RobotType.SOLDIER) < Broadcast.getRobotCount(RobotType.GARDENER)-1))) // temporary solution
+            			rc.plantTree(buildSequence[i]);
+            	}
+    			
+            	// System.out.println("Planted Trees Bytecodes: " + Clock.getBytecodeNum());
+            	
+                buildRobot(RobotType.SOLDIER, buildSequence[sweetSpot]);
+            	
+            	// System.out.println("Built Soldiers Bytecodes: " + Clock.getBytecodeNum());
 
-                MapLocation myLocation = rc.getLocation();
-                Direction towardsArchon = myLocation.directionTo(archonLoc);
-                
-                // end turn
-
-                rc.broadcast(((int)Math.random() * 1000), 10);
-
-                // Randomly attempt to build a soldier
-                if ((init || Math.random() < 0.3) && rc.hasRobotBuildRequirements(RobotType.SCOUT) && rc.canBuildRobot(RobotType.SCOUT, towardsArchon.opposite())) {
-                    rc.buildRobot(RobotType.SCOUT, towardsArchon.opposite());
-                    Broadcast.incrementScoutCount();
-                    init = false;
-                }
-                if (rc.hasRobotBuildRequirements(RobotType.SOLDIER) && rc.canBuildRobot(RobotType.SOLDIER, towardsArchon.opposite())) {
-                    rc.buildRobot(RobotType.SOLDIER, towardsArchon.opposite());
-                    Broadcast.incrementSoldierCount();
-                }
-                
-                
-                // Move
-                if (treeSize < 4) {
-		            float dist = myLocation.distanceTo(archonLoc);
-		            if(dist < 14) {
-		                tryMove(towardsArchon.opposite());
-		            } else {
-		                if(dist < 20 || !tryMove(towardsArchon)) {
-		                    tryMove(randomDirection());
-		                }
-		            }
-		        } else if (!tryMove(rc.getLocation().directionTo(plantedOwner[treeIndex].getLocation()))) {
-	        		tryMove(randomDirection());
-	        	}
-
-                if(!Broadcast.anyReinforcementsRequests()) {
-                    Direction dir = randomDirection();
-                    if( rc.canPlantTree(dir) && (treeSize * Broadcast.getGardenerCount() < Broadcast.getSoldierCount()) && treeSize < 4) {
-                        rc.plantTree(dir);
-                        TreeInfo[] trees = rc.senseNearbyTrees();
-                        if (trees.length > 0)
-                        	plantedOwner[treeIndex] = trees[0];
-                        treeIndex = (treeIndex + 1) % treeSize;
-                        treeSize++;
-                    }
-                }
-
-                if (treeSize < 4) {
-		            TreeInfo[] trees = rc.senseNearbyTrees();
-		            if(trees.length > 0 && rc.canWater(trees[0].location)) {
-		                rc.water(trees[0].location);
-		            }
-		        } else {
-		        	if(rc.canWater(plantedOwner[treeIndex].location)) {
-		                rc.water(plantedOwner[treeIndex].location);
-		                treeIndex = (treeIndex + 1) % treeSize;
-		            } else if (rc.getLocation().distanceTo(plantedOwner[treeIndex].location) < .5)
-		            	treeIndex = (treeIndex + 1) % treeSize;
-		        }
-                
                 Clock.yield();
 
-            } catch (Exception e) {
-                System.out.println("Gardener Exception");
-                e.printStackTrace();
+            } catch (Exception e) {	
+            	System.out.println("Gardener: Exception");
+                e.printStackTrace();     
             }
         }
-
     }
 }

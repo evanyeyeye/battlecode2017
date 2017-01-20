@@ -184,50 +184,85 @@ public class Broadcast {
     }
 
     public static void dying(int ID) throws GameActionException {
+    	
 		if(ID >= 500 && ID < 1000)
 			rc.broadcast(ID, DYING);
+		
     }
-
+    
     /*
-     * Unit Counting
+     * Add one to robot count
+     * @param type RobotType being incremented
      */
-    
-    // Gardeners
-    public static void incrementGardenerCount() throws GameActionException {
-        incrementGardenerCount(1);
-    }
-
-    public static void incrementGardenerCount(int num) throws GameActionException {
-        rc.broadcast(GARDENER_COUNT_INDEX, rc.readBroadcast(GARDENER_COUNT_INDEX) + num);
-    }
-
-    public static int getGardenerCount() throws GameActionException {
-        return rc.readBroadcast(GARDENER_COUNT_INDEX);
-    }
-
-    // Soldiers
-    public static void incrementSoldierCount() throws GameActionException {
-        incrementSoldierCount(1);
-    }
-
-    public static void incrementSoldierCount(int num) throws GameActionException {
-        rc.broadcast(SOLDIER_COUNT_INDEX, rc.readBroadcast(SOLDIER_COUNT_INDEX) + num);
-    }
-
-    public static int getSoldierCount() throws GameActionException {
-        return rc.readBroadcast(SOLDIER_COUNT_INDEX);
+    public static void incrementRobotCount(RobotType type) throws GameActionException {
+    	
+    	int index = 0;
+    	switch (type) {
+	        case GARDENER:
+	        	index = GARDENER_COUNT_INDEX;
+	            break;
+	        case SOLDIER:
+	        	index = SOLDIER_COUNT_INDEX;
+	            break;
+	        case LUMBERJACK:
+	        	index = LUMBERJACK_COUNT_INDEX;
+	            break;
+	        case SCOUT:
+	        	index = SCOUT_COUNT_INDEX;
+	            break;
+	    }
+    	
+    	rc.broadcast(index, rc.readBroadcast(index) + 1);    
     }
     
-    public static void incrementScoutCount() throws GameActionException {
-        incrementScoutCount(1);
-    }
-
-    public static void incrementScoutCount(int num) throws GameActionException {
-        rc.broadcast(SCOUT_COUNT_INDEX, rc.readBroadcast(SCOUT_COUNT_INDEX) + num);
-    }
-
-    public static int getScoutCount() throws GameActionException {
-        return rc.readBroadcast(SCOUT_COUNT_INDEX);
+    /*
+     * Subtract one from robot count
+     * @param type RobotType being decremented
+     */
+    public static void decrementRobotCount(RobotType type) throws GameActionException {
+    	
+    	int index = 0;
+    	switch (type) {
+	        case GARDENER:
+	        	index = GARDENER_COUNT_INDEX;
+	            break;
+	        case SOLDIER:
+	        	index = SOLDIER_COUNT_INDEX;
+	            break;
+	        case LUMBERJACK:
+	        	index = LUMBERJACK_COUNT_INDEX;
+	            break;
+	        case SCOUT:
+	        	index = SCOUT_COUNT_INDEX;
+	            break;
+	    }
+    	
+        rc.broadcast(index, rc.readBroadcast(index) - 1);    
     }
     
+    /*
+     * Get robot count
+     * @param type RobotType needed
+     * @return count of RobotType in Team
+     */
+    public static int getRobotCount(RobotType type) throws GameActionException {
+    	
+    	int index = 0;
+    	switch (type) {
+	        case GARDENER:
+	        	index = GARDENER_COUNT_INDEX;
+	            break;
+	        case SOLDIER:
+	        	index = SOLDIER_COUNT_INDEX;
+	            break;
+	        case LUMBERJACK:
+	        	index = LUMBERJACK_COUNT_INDEX;
+	            break;
+	        case SCOUT:
+	        	index = SCOUT_COUNT_INDEX;
+	            break;
+	    }
+    	
+        return rc.readBroadcast(index);
+    }
 }

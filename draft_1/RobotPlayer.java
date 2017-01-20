@@ -8,8 +8,6 @@ public strictfp class RobotPlayer {
     static MapLocation[] enemyArchonLocations;
 
     static MapLocation archonLoc;
-    
-    static Direction[] dirList = new Direction[9];
 
     @SuppressWarnings("unused")
     public static void run(RobotController rc) throws GameActionException {
@@ -37,16 +35,8 @@ public strictfp class RobotPlayer {
                 break;
         }
 	}
-
-    /**
-     * Initializes list of every pi/4 radian directions
-     */
-    public static void initDirList() {
-    	for (int i=1; i<dirList.length; i++)
-    		dirList[i] = new Direction((float)(2 * Math.PI * ((float)(i-1)) / dirList.length));
-    }
-
-    /**
+    
+    /*
      * @return a random Direction
      */
     public static Direction randomDirection() {
