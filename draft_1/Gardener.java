@@ -85,7 +85,7 @@ public class Gardener extends RobotPlayer {
 
                 rc.broadcast(((int)Math.random() * 1000), 10);
                 // Generate a random direction
-                Direction towardsArchon = new Direction((float)Math.atan((archonLoc.x-rc.getLocation().x)/(archonLoc.y-rc.getLocation().y)));
+                Direction towardsArchon = rc.getLocation().directionTo(archonLoc);
                 // Randomly attempt to build a soldier
                 if (rc.hasRobotBuildRequirements(RobotType.SOLDIER) && rc.canBuildRobot(RobotType.SOLDIER, towardsArchon.opposite()) && Math.random() < .8) {
                     rc.buildRobot(RobotType.SOLDIER, towardsArchon.opposite());
@@ -110,6 +110,9 @@ public class Gardener extends RobotPlayer {
                         rc.donate((float) 10.0);
                     }*/
                 }
+                
+                if (rc.getTeamBullets() >= 200) 
+                	rc.donate(10);
                 
                 Clock.yield();
 

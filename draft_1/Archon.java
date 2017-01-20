@@ -186,9 +186,6 @@ public class Archon extends RobotPlayer {
                     tryMove(closestEnemy.directionTo(archonLocation));
                 };
 
-                if(Math.random() < 0.05)
-                    tryMove(randomDirection());
-
                 // Broadcast archon's location for other robots on the team to know
                 if(main_archon) {
                     rc.broadcast(0,Float.floatToRawIntBits(archonLocation.x));
@@ -205,7 +202,7 @@ public class Archon extends RobotPlayer {
                 }
                 
                 tryMove(randomDirection());
-
+                
                 Clock.yield();
 
             } catch (Exception e) {
