@@ -14,10 +14,10 @@ public class Gardener extends RobotPlayer {
    
     	if (rc.getTeam() == Team.A) // Team A usually faces right 
 	    	for (int i=0; i<dirSequence.length; i++)
-	    		dirSequence[i] = new Direction((float)(Math.PI / 3 * (i+1)));
+	    		dirSequence[i] = new Direction((float)(Math.PI / 3 * i));
     	else if (rc.getTeam() == Team.B) // and Team B usually faces right 
 	    	for (int i=0; i<dirSequence.length; i++)
-	    		dirSequence[i] = new Direction((float)((2 * Math.PI / 3) - (i * Math.PI / 3)));
+	    		dirSequence[i] = new Direction((float)(Math.PI - (Math.PI / 3 * i)));
     	
     	return dirSequence;
     }
@@ -42,15 +42,26 @@ public class Gardener extends RobotPlayer {
     public static boolean testHome() throws GameActionException {
     	
     	System.out.println("Begin Test Home");
+    	
+    	RobotInfo[] robotsNearMe = rc.senseNearbyRobots((rc.getType().bodyRadius + rc.getType().sensorRadius) / (float)2.0); 
+    	for (int i=0; i<robotsNearMe.length; i++)
+    		if (robotsNearMe[i].getType() == RobotType.ARCHON) { // make sure Gardener is not touching Archon
+    			if (rc.canMove(rc.getLocation().directionTo(robotsNearMe[i].getLocation()).opposite()))
+    				rc.move(rc.getLocation().directionTo(robotsNearMe[i].getLocation()).opposite());
+    			return false;
+    		}
+    		
     	int openCount = 0; // number of directions that are not blocked by objects
     	boolean openPath = false; // since no path finding implementation yet, I say if a path is open 2 strides in a row, there is an open path
-    	int tempSweetSpot = 6; // 6 by default, set in createBuildDirSequence()
+    	int tempSweetSpot = 0; // 0 by default, set in createBuildDirSequence()
     	for (int i=0; i<buildSequence.length; i++) {
-			if (rc.onTheMap(rc.getLocation().add(buildSequence[i], (float)1.0), rc.getType().bodyRadius) 
-					&& !rc.isCircleOccupiedExceptByThisRobot(rc.getLocation().add(buildSequence[i], (float)1.0), rc.getType().bodyRadius)) {
+    		rc.setIndicatorDot(rc.getLocation().add(buildSequence[i], rc.getType().bodyRadius + rc.getType().strideRadius), 0, 0, 0);
+			if (rc.onTheMap(rc.getLocation().add(buildSequence[i], rc.getType().bodyRadius + rc.getType().strideRadius), rc.getType().bodyRadius) 
+					&& !rc.isCircleOccupiedExceptByThisRobot(rc.getLocation().add(buildSequence[i], rc.getType().bodyRadius + rc.getType().strideRadius), rc.getType().bodyRadius)) {
 				openCount++;
 				if (!openPath) { // structured awkwardly in order to reduce expensive bytecode operations
-					openPath = !rc.isCircleOccupiedExceptByThisRobot(rc.getLocation().add(buildSequence[i], (float)2.0), rc.getType().bodyRadius);
+					openPath = rc.onTheMap(rc.getLocation().add(buildSequence[i], rc.getType().bodyRadius + rc.getType().strideRadius + (float)1.0), rc.getType().bodyRadius) 
+							&& !rc.isCircleOccupiedExceptByThisRobot(rc.getLocation().add(buildSequence[i], rc.getType().bodyRadius + rc.getType().strideRadius + (float)1.0), rc.getType().bodyRadius);
 					if (openPath) 
 						tempSweetSpot = i; // annoying but necessary
 				}
@@ -83,14 +94,14 @@ public class Gardener extends RobotPlayer {
               
             	// System.out.println("Starting Loop Bytecodes: " + Clock.getBytecodeNum());
             	
-            	TreeInfo[] neutralTrees = rc.senseNearbyTrees(rc.getType().strideRadius, Team.NEUTRAL); 
+            	TreeInfo[] neutralTrees = rc.senseNearbyTrees(rc.getType().bodyRadius + rc.getType().strideRadius, Team.NEUTRAL); 
             	for (int i=0; i<neutralTrees.length; i++)
             		if (neutralTrees[i].getContainedBullets() > 0 && rc.canShake(neutralTrees[i].getLocation()))
             			rc.shake(neutralTrees[i].getLocation()); // Collect free bullets from neutral trees
 	            
             	// System.out.println("Shook Trees Bytecodes: " + Clock.getBytecodeNum());
             	
-            	TreeInfo[] closeTrees = rc.senseNearbyTrees(rc.getType().strideRadius, rc.getTeam());
+            	TreeInfo[] closeTrees = rc.senseNearbyTrees(rc.getType().bodyRadius + rc.getType().strideRadius, rc.getTeam());
             	if (closeTrees.length > 0) {
             		TreeInfo treeToWater = closeTrees[0];
             		float minHealth = closeTrees[0].getHealth();
@@ -118,7 +129,7 @@ public class Gardener extends RobotPlayer {
             		for (int i=0; i<buildSequence.length; i++) {
             			if (rc.hasMoved())
             				break;
-            			if (rc.isCircleOccupiedExceptByThisRobot(rc.getLocation().add(buildSequence[i], (float)1.0), rc.getType().bodyRadius) 
+            			if (rc.isCircleOccupiedExceptByThisRobot(rc.getLocation().add(buildSequence[i], rc.getType().bodyRadius + rc.getType().strideRadius), rc.getType().bodyRadius) 
             					&& rc.canMove(buildSequence[i].opposite()))
             				rc.move(buildSequence[i].opposite());
             		}
@@ -126,7 +137,7 @@ public class Gardener extends RobotPlayer {
             		// System.out.println("Tested Home Bytecodes: " + Clock.getBytecodeNum());
             		
             		foundHome = testHome();
-            		if (!testHome()) { // A little weird, but if testHome() is true than process below code without waiting for another loop.
+            		if (!foundHome) { // A little weird, but if testHome() is true than process below code without waiting for another loop.
             			Clock.yield();
             			continue;
             		}
