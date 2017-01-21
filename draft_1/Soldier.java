@@ -61,11 +61,14 @@ public class Soldier extends RobotPlayer {
                     }
                 }
                 
-                TreeInfo[] neutralTrees = rc.senseNearbyTrees(rc.getType().bodyRadius + rc.getType().strideRadius, Team.NEUTRAL); 
-            	for (int i=0; i<neutralTrees.length; i++)
-            		if (neutralTrees[i].getContainedBullets() > 0 && rc.canShake(neutralTrees[i].getLocation()))
-            			rc.shake(neutralTrees[i].getLocation()); // Collect free bullets from neutral trees
-                
+                TreeInfo[] neutralTrees = rc.senseNearbyTrees(rc.getType().bodyRadius + rc.getType().strideRadius, Team.NEUTRAL);
+            	for (int i=0; i<neutralTrees.length; i++) {
+                    MapLocation loc = neutralTrees[i].getLocation();
+            		if (neutralTrees[i].getContainedBullets() > 0 && rc.canShake(neutralTrees[i].getLocation())) {
+            			rc.shake(loc); // Collect free bullets from neutral trees
+                    }
+                    Broadcast.requestLumberjack(loc);
+                }
                 if(ID > 500) {
 
                     int code = rc.readBroadcast(ID);

@@ -216,9 +216,12 @@ public class Archon extends RobotPlayer {
                     tryMove(closestEnemy.directionTo(archonLocation));
                 };
 
+
+                // Low priority tasks
+                //
                 // Broadcast archon's location for other robots on the team to know
                 if(main_archon) {
-                    System.out.println("Broadcasting location: " + archonLocation.x + " " + archonLocation.y);
+                    // System.out.println("Broadcasting location: " + archonLocation.x + " " + archonLocation.y);
                     rc.broadcast(0,Float.floatToRawIntBits(archonLocation.x));
                     rc.broadcast(1,Float.floatToRawIntBits(archonLocation.y));
                 } else {

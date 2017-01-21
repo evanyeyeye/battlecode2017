@@ -19,15 +19,17 @@ public class Broadcast {
     public static int MAIN_ARCHON_IN_DISTRESS   = 6;
 
     /* Indexes 7-10 Keeps track of the number of each robot type spawned */
-    public static int GARDENER_COUNT_INDEX = 7;
-    public static int SOLDIER_COUNT_INDEX = 8;
-    public static int LUMBERJACK_COUNT_INDEX = 9;
-    public static int SCOUT_COUNT_INDEX = 10;
+    public static int GARDENER_COUNT_INDEX      = 7;
+    public static int SOLDIER_COUNT_INDEX       = 8;
+    public static int LUMBERJACK_COUNT_INDEX    = 9;
+    public static int SCOUT_COUNT_INDEX         = 10;
 
     public static int REINFORCEMENTS_REQUESTS[] = {200, 203, 206, 209};
 
     // Each robot takes 3 indices: [age, x, y]
     public static int ARCHON_AVOID_ROBOTS[]     = {100, 103, 106, 109, 112, 115, 118, 121, 124, 127};
+
+    public static int LUMBERJACK_REQUESTS[]      = {130, 133, 136, 139};
 
     public static int MAIN_ARCHON               = 99;
 
@@ -49,6 +51,21 @@ public class Broadcast {
 
     public static void initBroadcaster(RobotController r) {
         rc = r;
+    }
+
+    public static boolean requestLumberjack(MapLocation ml) throws GameActionException {
+        for(int i : LUMBERJACK_REQUESTS) {
+            if(rc.readBroadcast(i) == 0) {
+                rc.broadcast(i, rc.getRoundNum()*1000 + (int)(Math.random()*1000));
+                rc.broadcast(i+1,
+                        Float.floatToRawIntBits(ml.x));
+                rc.broadcast(i+2,
+                        Float.floatToRawIntBits(ml.y));
+                System.out.println("Requesting lumberjacks at " + ml.y + " " + ml.x);
+                return true;
+            }
+        }
+        return false;
     }
 
     public static boolean checkMainArchonDistress() throws GameActionException {

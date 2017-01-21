@@ -6,6 +6,44 @@ public class Lumberjack extends RobotPlayer {
 	public static int ID = 0;	
 	
 	public static boolean dying = false;
+
+    static void checkForRequests(MapLocation myLocation) throws GameActionException {
+        MapLocation closestLocation = null;
+        double closestDistance = Double.MAX_VALUE;
+        // This treeID is not the real tree ID, it's just made up
+        int treeID = 0;
+        int minTreeID = 0;
+        int broadcast_index = 0;
+        for(int i : Broadcast.LUMBERJACK_REQUESTS) {
+            treeID = rc.readBroadcast(i);
+            if(treeID >= 0) {
+                MapLocation ml = new MapLocation(Float.intBitsToFloat(rc.readBroadcast(i+1)),
+                            Float.intBitsToFloat(rc.readBroadcast(i+2)));
+                double dist = myLocation.distanceTo(ml);
+                if(closestLocation == null || closestDistance > dist) {
+                    closestLocation = ml;
+                    closestDistance = dist;
+                    minTreeID = treeID;
+                    broadcast_index = i;
+                }
+            }
+        }
+        if(minTreeID == 0) return;
+        if(closestDistance < (rc.getType().bodyRadius + rc.getType().strideRadius)) {
+            if(rc.canChop(closestLocation)) {
+                rc.chop(closestLocation);
+            } else {
+                // The tree is gone
+                if(rc.readBroadcast(broadcast_index) == minTreeID) {
+                    rc.broadcast(broadcast_index, 0);
+                }
+            }
+        }
+        Direction dir = myLocation.directionTo(closestLocation);
+        if(rc.canMove(dir)) {
+            rc.move(dir);
+        }
+    }
 	
     public static void run(RobotController rc) {
         
@@ -22,6 +60,10 @@ public class Lumberjack extends RobotPlayer {
                     ID = -ID; // render ID unusable
                     dying = true; // code will not enter this if statement again
             	}
+
+                MapLocation myLocation = rc.getLocation();
+
+                checkForRequests(myLocation);
             	
             	TreeInfo[] neutralTrees = rc.senseNearbyTrees(rc.getType().bodyRadius + rc.getType().strideRadius, Team.NEUTRAL); 
             	for (int i=0; i<neutralTrees.length; i++)
