@@ -30,17 +30,22 @@ public class Soldier extends RobotPlayer {
         Team enemy = rc.getTeam().opponent();
         Team ally  = rc.getTeam();
 
-        // The code you want your robot to perform every round should be in this loop
         while (true) {
 
-            // Try/catch blocks stop unhandled exceptions, which cause your robot to explode
             try {
 
+                if (rc.getHealth() < rc.getType().maxHealth / 10 && !dying) {
+                	Broadcast.decrementRobotCount(RobotType.GARDENER); // Broadcast death on low health
+            		Broadcast.dying(ID);
+            		ID = -ID; // render ID unusable
+                    dying = true; // code will not enter this if statement again
+                }
+                
                 if(ID < 500 && !dying) {
                     ID = Broadcast.requestID(ID);
                 }
 
-
+                
                 float archon_x = Float.intBitsToFloat(rc.readBroadcast(
                             Broadcast.MAIN_ARCHON_POSITION[0]));
                 float archon_y = Float.intBitsToFloat(rc.readBroadcast(
@@ -55,16 +60,12 @@ public class Soldier extends RobotPlayer {
                         tryMove(myLocation.directionTo(archonLocation));
                     }
                 }
-
-                // Read instructions but immediately broadcast death notice
-                if (rc.getHealth() < rc.getType().maxHealth / 10) {
-                    // Revoke ID
-                    Broadcast.dying(ID);
-                    Broadcast.decrementRobotCount(RobotType.SOLDIER);
-                    dying = true;
-                    ID = -ID;
-                }
-
+                
+                TreeInfo[] neutralTrees = rc.senseNearbyTrees(rc.getType().bodyRadius + rc.getType().strideRadius, Team.NEUTRAL); 
+            	for (int i=0; i<neutralTrees.length; i++)
+            		if (neutralTrees[i].getContainedBullets() > 0 && rc.canShake(neutralTrees[i].getLocation()))
+            			rc.shake(neutralTrees[i].getLocation()); // Collect free bullets from neutral trees
+                
                 if(ID > 500) {
 
                     int code = rc.readBroadcast(ID);
@@ -77,7 +78,7 @@ public class Soldier extends RobotPlayer {
                         float x_f = Float.intBitsToFloat(x);
                         float y_f = Float.intBitsToFloat(y);
                         int type = coordinates[2];
-                        switch(type) {
+                        switch (type) {
                             case REINFORCE:
                                 if(Direct.retreat())
                                     tryMove(myLocation.directionTo(archonLocation));
@@ -89,11 +90,8 @@ public class Soldier extends RobotPlayer {
                                         rc.broadcast(ID, code*-1);
                                         break;
                                     }
-                                    try {
-                                        tryMove(myLocation.directionTo(requestedLocation));
-                                    } catch(Exception e) {
-                                        System.out.println("EXCEPTION: TRIED TO MOVE TO: " + x_f + " " + y_f);
-                                    }
+                                    
+                                    tryMove(myLocation.directionTo(requestedLocation));
                                 }
                                 break;
                         }
@@ -188,9 +186,7 @@ public class Soldier extends RobotPlayer {
                         }
                     }
                 }
-                //Direction towardsArchon = new Direction((float)Math.atan((archonLoc.x-rc.getLocation().x)/(archonLoc.y-rc.getLocation().y)));
-                // Move randomly
-                //tryMove(towardsArchon.opposite());
+
                 if(Direct.retreat())
                     tryMove(myLocation.directionTo(archonLocation));
                 else {
@@ -214,6 +210,5 @@ public class Soldier extends RobotPlayer {
                 e.printStackTrace();
             }
         }
-
     }
 }

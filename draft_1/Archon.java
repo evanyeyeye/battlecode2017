@@ -143,8 +143,6 @@ public class Archon extends RobotPlayer {
         for(int i = 400; i<490; i++) {
             dynamicIDs_unallocated.add(i);
         }
-
-        enemyArchonLocations = rc.getInitialArchonLocations(rc.getTeam().opponent());
         
         while (true) {
             try {
@@ -161,10 +159,12 @@ public class Archon extends RobotPlayer {
                 // Build gardeners 
                 Direction dir = randomDirection();
 
-                if (rc.canHireGardener(dir)) {
-            		rc.hireGardener(dir);
+                if (rc.canHireGardener(dir) && (Broadcast.getRobotCount(RobotType.GARDENER) < 3 || Broadcast.getRobotCount(RobotType.GARDENER) < Broadcast.getRobotCount(RobotType.SOLDIER) / 2)
+                	&& (rc.onTheMap(rc.getLocation().add(dir, rc.getType().bodyRadius + rc.getType().strideRadius + (float)3.0), rc.getType().bodyRadius) 
+					&& !rc.isCircleOccupiedExceptByThisRobot(rc.getLocation().add(dir, rc.getType().bodyRadius + rc.getType().strideRadius + (float)3.0), rc.getType().bodyRadius))) {
+            		rc.hireGardener(dir); // temporary check (TODO: DOESNT WORK ON TIGHT MAPS) until gardeners become legit
             		Broadcast.incrementRobotCount(RobotType.GARDENER);
-                }
+                } 
                 
                 MapLocation archonLocation = rc.getLocation();
 

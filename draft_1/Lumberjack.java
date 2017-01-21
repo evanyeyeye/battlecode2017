@@ -3,56 +3,98 @@ import battlecode.common.*;
 
 public class Lumberjack extends RobotPlayer {
 
+	public static int ID = 0;	
+	
+	public static boolean dying = false;
+	
     public static void run(RobotController rc) {
-        RobotPlayer.rc = rc;
+        
+    	RobotPlayer.rc = rc;
+        System.out.println("Lumberjack: Spawn");
 
-        System.out.println("I'm a lumberjack!");
-        Team enemy = rc.getTeam().opponent();
-
-        // The code you want your robot to perform every round should be in this loop
         while (true) {
-
-            // Try/catch blocks stop unhandled exceptions, which cause your robot to explode
+        	
             try {
 
-                // See if there are any enemy robots within striking range (distance 1 from lumberjack's radius)
-                RobotInfo[] robots = rc.senseNearbyRobots(RobotType.LUMBERJACK.bodyRadius+GameConstants.LUMBERJACK_STRIKE_RADIUS, enemy);
-                TreeInfo[] trees = rc.senseNearbyTrees();
-                if(robots.length > 0 && !rc.hasAttacked()) {
-                    // Use strike() to hit all nearby robots!
-                    rc.strike();
-
-                } else {
-                    // No close robots, so search for robots within sight radius
-                    robots = rc.senseNearbyRobots(-1,enemy);
-
-                    // If there is a robot, move towards it
-                    if(robots.length > 0) {
-                        MapLocation myLocation = rc.getLocation();
-                        MapLocation enemyLocation = robots[0].getLocation();
-                        Direction toEnemy = myLocation.directionTo(enemyLocation);
-
-                        tryMove(toEnemy);
+            	if (rc.getHealth() < rc.getType().maxHealth / 10 && !dying) {
+            		Broadcast.decrementRobotCount(RobotType.LUMBERJACK); // Broadcast death on low health
+                    Broadcast.dying(ID);
+                    ID = -ID; // render ID unusable
+                    dying = true; // code will not enter this if statement again
+            	}
+            	
+            	TreeInfo[] neutralTrees = rc.senseNearbyTrees(rc.getType().bodyRadius + rc.getType().strideRadius, Team.NEUTRAL); 
+            	for (int i=0; i<neutralTrees.length; i++)
+            		if (neutralTrees[i].getContainedBullets() > 0 && rc.canShake(neutralTrees[i].getLocation()))
+            			rc.shake(neutralTrees[i].getLocation()); // Collect free bullets from neutral trees
+            	
+            	RobotInfo[] enemyRobots = rc.senseNearbyRobots(rc.getType().bodyRadius + GameConstants.LUMBERJACK_STRIKE_RADIUS, rc.getTeam().opponent());
+                if (!rc.hasAttacked()) {	
+                	if (enemyRobots.length > rc.senseNearbyRobots(GameConstants.LUMBERJACK_STRIKE_RADIUS, rc.getTeam()).length + rc.senseNearbyTrees(GameConstants.LUMBERJACK_STRIKE_RADIUS, rc.getTeam()).length)
+                		rc.strike(); // attack enemies if close enough and worth it
+                } else if (rc.senseNearbyBullets().length > 0) { // if there is nearby combat  	
+                	enemyRobots = rc.senseNearbyRobots(rc.getType().bodyRadius + rc.getType().sensorRadius, rc.getTeam().opponent());
+                    if (!rc.hasMoved()) {
+                    	for (int i=0; i<enemyRobots.length; i++) {
+                    		Direction dirToEnemy = rc.getLocation().directionTo(enemyRobots[i].getLocation());
+                    		if (rc.canMove(dirToEnemy)) {
+                    			rc.move(dirToEnemy); // move towards closest enemy
+                    			break;
+                    		}
+                    	}
                     }
-
                 }
-                if (trees.length > 0) {
-                    for(int i = 0; i < trees.length; i++) {
-                        Direction towardsTree = new Direction((float) Math.atan((trees[i].location.x-rc.getLocation().x)/(trees[i].location.y-rc.getLocation().y)));
-                        tryMove(towardsTree);
-                        rc.chop(trees[i].location);
-                    }
-                } else {
-                    tryMove(randomDirection());
+                
+                
+                if (!rc.hasMoved()) { // no enemies, so move to nearest Tree
+                	TreeInfo[] nearbyTrees = rc.senseNearbyTrees();
+                	for (int i=0; i<nearbyTrees.length; i++) {
+                		if (nearbyTrees[i].getTeam() == rc.getTeam())
+                			continue;
+                		Direction dirToTree = rc.getLocation().directionTo(nearbyTrees[i].getLocation());
+                		if (rc.canMove(dirToTree)) {
+                			rc.move(dirToTree);
+                			break;
+                		}
+                	}
                 }
-                // Clock.yield() makes the robot wait until the next turn, then it will perform this loop again
+                
+                if (!rc.hasAttacked()) { // first try attacking enemy trees
+                	TreeInfo[] enemyTrees = rc.senseNearbyTrees(GameConstants.LUMBERJACK_STRIKE_RADIUS, rc.getTeam().opponent());
+                	for (int i=0; i<enemyTrees.length; i++) {
+                		MapLocation enemyTreeLocation = enemyTrees[i].getLocation();
+                		if (rc.canChop(enemyTreeLocation)) {
+                			rc.chop(enemyTreeLocation);
+                			break;
+                		}
+                	}
+                }
+                
+                if (!rc.hasAttacked())  // than try neutral trees (already called in beginning for shaking trees)
+                	for (int i=0; i<neutralTrees.length; i++) {
+                		if (neutralTrees[i].getContainedRobot() == null) // prioritize trees with robots inside
+                			continue;
+                		MapLocation neutralTreeLocation = neutralTrees[i].getLocation();
+                		if (rc.canChop(neutralTreeLocation)) {
+                			rc.chop(neutralTreeLocation);
+                			break;
+                		}
+                	}
+                if (!rc.hasAttacked()) // nested if statement to avoid both using bytecodes (senseNearbyTrees) and to avoid unnecessary for loop
+                	for (int i=0; i<neutralTrees.length; i++) { // if nothing in your robot life worked so far you can be sad and chop normal trees
+                		MapLocation neutralTreeLocation = neutralTrees[i].getLocation();
+                		if (rc.canChop(neutralTreeLocation)) {
+                			rc.chop(neutralTreeLocation);
+                			break;
+                		}
+                	}
+    		
                 Clock.yield();
 
             } catch (Exception e) {
-                System.out.println("Lumberjack Exception");
+                System.out.println("Lumberjack: Exception");
                 e.printStackTrace();
             }
         }
-
     }
 }

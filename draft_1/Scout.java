@@ -2,9 +2,6 @@ package draft_1;
 import battlecode.common.*;
 
 public class Scout extends RobotPlayer {
-
-    static final int MAX_HP = 20;
-
 	public static double[] goToEdge() {
 		Direction way = randomDirection();
 		double[] count = new double[2];
@@ -95,9 +92,10 @@ public class Scout extends RobotPlayer {
 	public static boolean init = true;
 	
     public static void run(RobotController rc) {
+    	
         RobotPlayer.rc = rc;
 
-        System.out.println("I'm a scout!");
+        System.out.println("Scout: Spawn");
         Team enemy = rc.getTeam().opponent();
 
         // The code you want your robot to perform every round should be in this loop
@@ -146,10 +144,9 @@ public class Scout extends RobotPlayer {
                 Clock.yield();
 
             } catch (Exception e) {
-                System.out.println("Scout Exception");
+                System.out.println("ScoutLsssssss: Exception");
                 e.printStackTrace();
             }
         }
-
     }
 }

@@ -41,12 +41,12 @@ public class Gardener extends RobotPlayer {
     
     public static boolean testHome() throws GameActionException {
     	
-    	System.out.println("Begin Test Home");
+    	// System.out.println("Begin Test Home");
     	
-    	RobotInfo[] robotsNearMe = rc.senseNearbyRobots((rc.getType().bodyRadius + rc.getType().sensorRadius) / (float)2.0); 
+    	RobotInfo[] robotsNearMe = rc.senseNearbyRobots((rc.getType().bodyRadius + rc.getType().sensorRadius)); 
     	for (int i=0; i<robotsNearMe.length; i++)
     		if (robotsNearMe[i].getType() == RobotType.ARCHON) { // make sure Gardener is not touching Archon
-    			if (rc.canMove(rc.getLocation().directionTo(robotsNearMe[i].getLocation()).opposite()))
+    			if (!rc.hasMoved() && rc.canMove(rc.getLocation().directionTo(robotsNearMe[i].getLocation()).opposite()))
     				rc.move(rc.getLocation().directionTo(robotsNearMe[i].getLocation()).opposite());
     			return false;
     		}
@@ -66,7 +66,7 @@ public class Gardener extends RobotPlayer {
 						tempSweetSpot = i; // annoying but necessary
 				}
 			} 
-			System.out.println("" + i + ": " + openCount);
+			// System.out.println("" + i + ": " + openCount);
     	}
     	
     	if (openCount > 2 && openPath) {
@@ -75,6 +75,10 @@ public class Gardener extends RobotPlayer {
     	}
     	return false;
     }
+    
+    public static int ID = 0;
+    
+    public static boolean dying = false;
     
     public static Direction[] buildSequence; // Initiate gardener building sequence 
     public static int sweetSpot; // Opening for robot production
@@ -89,10 +93,17 @@ public class Gardener extends RobotPlayer {
         boolean foundHome = testHome(); // :(
         
         while (true) {
-
+        	
             try {
-              
+
             	// System.out.println("Starting Loop Bytecodes: " + Clock.getBytecodeNum());
+            	
+            	if (rc.getHealth() < rc.getType().maxHealth / 10 && !dying) {
+            		Broadcast.decrementRobotCount(RobotType.GARDENER); // Broadcast death on low health
+            		Broadcast.dying(ID);
+            		ID = -ID; // render ID unusable
+                    dying = true; // code will not enter this if statement again
+            	}
             	
             	TreeInfo[] neutralTrees = rc.senseNearbyTrees(rc.getType().bodyRadius + rc.getType().strideRadius, Team.NEUTRAL); 
             	for (int i=0; i<neutralTrees.length; i++)
@@ -115,13 +126,17 @@ public class Gardener extends RobotPlayer {
             	
             	// System.out.println("Watered Trees Bytecodes: " + Clock.getBytecodeNum());
             	
-            	if (rc.getHealth() < rc.getType().maxHealth / 10)
-            		Broadcast.decrementRobotCount(RobotType.GARDENER); // Broadcast death on low health
-            	
             	if (!foundHome) { // escaping homelessness
+            		
+            		if (rc.senseNearbyTrees(rc.getType().bodyRadius + rc.getType().strideRadius, Team.NEUTRAL).length + rc.senseNearbyTrees(rc.getType().bodyRadius + rc.getType().strideRadius, rc.getTeam().opponent()).length > 0 
+            				&& Broadcast.getRobotCount(RobotType.LUMBERJACK) < 1)
+            			for (int i=0; i<buildSequence.length; i++)
+            				if (buildRobot(RobotType.LUMBERJACK, buildSequence[i]))
+            					break;
+            		
             		if (rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent()).length > 0 
             				|| rc.senseNearbyBullets(rc.getType().bulletSightRadius).length > 0
-            				|| Broadcast.getRobotCount(RobotType.SOLDIER) < 1) // Emergency robot requirement scenarios
+            				|| Broadcast.getRobotCount(RobotType.SOLDIER) + Broadcast.getRobotCount(RobotType.LUMBERJACK) < 1) // Emergency robot requirement scenarios
             			for (int i=0; i<buildSequence.length; i++)
             				if (buildRobot(RobotType.SOLDIER, buildSequence[i]))
             					break;
@@ -132,6 +147,7 @@ public class Gardener extends RobotPlayer {
             			if (rc.isCircleOccupiedExceptByThisRobot(rc.getLocation().add(buildSequence[i], rc.getType().bodyRadius + rc.getType().strideRadius), rc.getType().bodyRadius) 
             					&& rc.canMove(buildSequence[i].opposite()))
             				rc.move(buildSequence[i].opposite());
+            			
             		}
             		
             		// System.out.println("Tested Home Bytecodes: " + Clock.getBytecodeNum());
