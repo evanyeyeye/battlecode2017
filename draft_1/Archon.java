@@ -160,8 +160,8 @@ public class Archon extends RobotPlayer {
                 Direction dir = randomDirection();
 
                 if (rc.canHireGardener(dir) && (Broadcast.getRobotCount(RobotType.GARDENER) < 3 || Broadcast.getRobotCount(RobotType.GARDENER) < Broadcast.getRobotCount(RobotType.SOLDIER) / 2)
-                	&& (rc.onTheMap(rc.getLocation().add(dir, rc.getType().bodyRadius + rc.getType().strideRadius + (float)3.0), rc.getType().bodyRadius) 
-					&& !rc.isCircleOccupiedExceptByThisRobot(rc.getLocation().add(dir, rc.getType().bodyRadius + rc.getType().strideRadius + (float)3.0), rc.getType().bodyRadius))) {
+                	&& (rc.onTheMap(rc.getLocation().add(dir, rc.getType().bodyRadius + rc.getType().strideRadius + (float)2.0), rc.getType().bodyRadius) 
+					&& !rc.isCircleOccupiedExceptByThisRobot(rc.getLocation().add(dir, rc.getType().bodyRadius + rc.getType().strideRadius + (float)2.0), rc.getType().bodyRadius))) {
             		rc.hireGardener(dir); // temporary check (TODO: DOESNT WORK ON TIGHT MAPS) until gardeners become legit
             		Broadcast.incrementRobotCount(RobotType.GARDENER);
                 } 
@@ -232,7 +232,7 @@ public class Archon extends RobotPlayer {
                     }
                 }
 
-                if (rc.getTeamBullets() > 10000.0)
+                if (rc.getTeamBullets() > 10000.0 || rc.getRoundLimit() == rc.getRoundNum())
                     rc.donate(rc.getTeamBullets()); // If over 10000 bullets, we win. 
 
                 Clock.yield();

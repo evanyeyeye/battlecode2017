@@ -52,7 +52,7 @@ public class Lumberjack extends RobotPlayer {
                 		if (nearbyTrees[i].getTeam() == rc.getTeam())
                 			continue;
                 		Direction dirToTree = rc.getLocation().directionTo(nearbyTrees[i].getLocation());
-                		if (rc.canMove(dirToTree)) {
+                		if (rc.canMove(dirToTree)) { // TODO: pathfinding :)
                 			rc.move(dirToTree);
                 			break;
                 		}

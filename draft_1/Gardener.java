@@ -128,7 +128,7 @@ public class Gardener extends RobotPlayer {
             	
             	if (!foundHome) { // escaping homelessness
             		
-            		if (rc.senseNearbyTrees(rc.getType().bodyRadius + rc.getType().strideRadius, Team.NEUTRAL).length + rc.senseNearbyTrees(rc.getType().bodyRadius + rc.getType().strideRadius, rc.getTeam().opponent()).length > 0 
+            		if (rc.senseNearbyTrees(rc.getType().bodyRadius + rc.getType().sensorRadius, Team.NEUTRAL).length + rc.senseNearbyTrees(rc.getType().bodyRadius + rc.getType().sensorRadius, rc.getTeam().opponent()).length > 0 
             				&& Broadcast.getRobotCount(RobotType.LUMBERJACK) < 1)
             			for (int i=0; i<buildSequence.length; i++)
             				if (buildRobot(RobotType.LUMBERJACK, buildSequence[i]))
@@ -172,7 +172,10 @@ public class Gardener extends RobotPlayer {
     			
             	// System.out.println("Planted Trees Bytecodes: " + Clock.getBytecodeNum());
             	
-                buildRobot(RobotType.SOLDIER, buildSequence[sweetSpot]);
+            	if (rc.senseNearbyTrees(rc.getType().bodyRadius + rc.getType().strideRadius, Team.NEUTRAL).length + rc.senseNearbyTrees(rc.getType().bodyRadius + rc.getType().strideRadius, rc.getTeam().opponent()).length > 0)
+            		buildRobot(RobotType.LUMBERJACK, buildSequence[sweetSpot]);
+            	else
+            		buildRobot(RobotType.SOLDIER, buildSequence[sweetSpot]);
             	
             	// System.out.println("Built Soldiers Bytecodes: " + Clock.getBytecodeNum());
 
