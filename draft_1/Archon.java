@@ -10,10 +10,11 @@ public class Archon extends RobotPlayer {
 
     static MapLocation[] corners = new MapLocation[4];
 
-    static HashSet<Integer> unusedIDs = new HashSet<Integer>();
-    static HashSet<Integer>   usedIDs = new HashSet<Integer>();
+    static HashSet<Integer> unusedIDs; // = new HashSet<Integer>(1);
+    static HashSet<Integer>   usedIDs; // = new HashSet<Integer>(1);
     static void fulfillIDRequests() throws GameActionException {
 
+        if(cycle_num < 7) return;
         Iterator<Integer> it = unusedIDs.iterator();
         for(int i : Broadcast.ID_REQUESTS) {
             int status = rc.readBroadcast(i);
@@ -29,8 +30,8 @@ public class Archon extends RobotPlayer {
     }
 
     // [400 - 490)
-    static HashSet<Integer> dynamicIDs_unallocated = new HashSet<Integer>();
-    static HashSet<Integer> dynamicIDs_allocated   = new HashSet<Integer>();
+    static HashSet<Integer> dynamicIDs_unallocated; // = new HashSet<Integer>(1);
+    static HashSet<Integer> dynamicIDs_allocated; // = new HashSet<Integer>(1);
 
     static boolean allocate(int slot, int information) throws GameActionException {
         if(dynamicIDs_allocated.contains(slot)) {
@@ -53,6 +54,7 @@ public class Archon extends RobotPlayer {
     static int reinforcements_slots[] = new int[4];
     static void fulfillReinforcementsRequests() throws GameActionException {
 
+        if(cycle_num < 10) return;
         int age;
         int num_requests = 0;
         for(int i=0;i<reinforcements_slots.length;i++) {
@@ -123,6 +125,8 @@ public class Archon extends RobotPlayer {
 
     }
 
+    static int cycle_num = 0;
+
     static boolean main_archon = false;
     // Main archon functions:
     // -- index and coordinate robots
@@ -137,13 +141,6 @@ public class Archon extends RobotPlayer {
     	
         RobotPlayer.rc = rc;
 
-        for(int i = 500; i<1000; i++) {
-            unusedIDs.add(i);
-        }
-        for(int i = 400; i<490; i++) {
-            dynamicIDs_unallocated.add(i);
-        }
-        
         while (true) {
             try {
 
@@ -155,6 +152,8 @@ public class Archon extends RobotPlayer {
                     fulfillIDRequests();
                     fulfillReinforcementsRequests();
                 }
+
+                System.out.println("cycle: " + cycle_num);
                 
                 // Build gardeners 
                 Direction dir = randomDirection();
@@ -165,6 +164,39 @@ public class Archon extends RobotPlayer {
             		rc.hireGardener(dir); // temporary check (TODO: DOESNT WORK ON TIGHT MAPS) until gardeners become legit
             		Broadcast.incrementRobotCount(RobotType.GARDENER);
                 } 
+
+                if(cycle_num < 7) {
+                    switch(cycle_num) {
+                        case 2:
+                            if(dynamicIDs_unallocated == null) {
+                                dynamicIDs_unallocated = new HashSet<Integer>();
+                            }
+                            break;
+                        case 3:
+                            if(dynamicIDs_allocated == null) {
+                                dynamicIDs_allocated = new HashSet<Integer>();
+                            }
+                            break;
+                        case 4:
+                            if(usedIDs == null) {
+                                usedIDs = new HashSet<Integer>();
+                            }
+                            break;
+                        case 5:
+                            if(unusedIDs == null) {
+                                unusedIDs = new HashSet<Integer>();
+                            }
+                            break;
+                        case 6:
+                            for(int i = 500; i<1000; i++) {
+                                unusedIDs.add(i);
+                            }
+                            for(int i = 400; i<490; i++) {
+                                dynamicIDs_unallocated.add(i);
+                            }
+                    }
+                }
+                cycle_num++;
                 
                 MapLocation archonLocation = rc.getLocation();
 
