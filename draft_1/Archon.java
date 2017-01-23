@@ -168,24 +168,16 @@ public class Archon extends RobotPlayer {
                 if(cycle_num < 7) {
                     switch(cycle_num) {
                         case 2:
-                            if(dynamicIDs_unallocated == null) {
-                                dynamicIDs_unallocated = new HashSet<Integer>();
-                            }
+                            dynamicIDs_unallocated = new HashSet<Integer>();
                             break;
                         case 3:
-                            if(dynamicIDs_allocated == null) {
-                                dynamicIDs_allocated = new HashSet<Integer>();
-                            }
+                            dynamicIDs_allocated = new HashSet<Integer>();
                             break;
                         case 4:
-                            if(usedIDs == null) {
-                                usedIDs = new HashSet<Integer>();
-                            }
+                            usedIDs = new HashSet<Integer>();
                             break;
                         case 5:
-                            if(unusedIDs == null) {
-                                unusedIDs = new HashSet<Integer>();
-                            }
+                            unusedIDs = new HashSet<Integer>();
                             break;
                         case 6:
                             for(int i = 500; i<1000; i++) {
@@ -194,6 +186,7 @@ public class Archon extends RobotPlayer {
                             for(int i = 400; i<490; i++) {
                                 dynamicIDs_unallocated.add(i);
                             }
+                            break;
                     }
                 }
                 cycle_num++;
