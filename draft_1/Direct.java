@@ -25,9 +25,9 @@ public class Direct {
         return send ? rc.getLocation().directionTo(broadcastingLocations[0]) : null;
     }
 
-    public static Direction directionToRobot(RobotInfo robot) {
+    /*public static Direction directionToRobot(RobotInfo robot) {
     	return new Direction((float)Math.atan((robot.location.x-rc.getLocation().x)/(robot.location.y-rc.getLocation().y)));
-    }
+    }*/
     
     public static boolean retreat(){
     	 return rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam()).length < rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent()).length;

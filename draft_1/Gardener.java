@@ -83,6 +83,8 @@ public class Gardener extends RobotPlayer {
     public static Direction[] buildSequence; // Initiate gardener building sequence 
     public static int sweetSpot; // Opening for robot production
     
+    public static boolean init = true;
+    
     public static void run(RobotController rc) throws GameActionException {
 
     	RobotPlayer.rc = rc;
@@ -98,6 +100,11 @@ public class Gardener extends RobotPlayer {
 
             	// System.out.println("Starting Loop Bytecodes: " + Clock.getBytecodeNum());
             	
+            	/*if(init) {
+            		rc.buildRobot(RobotType.SCOUT, Direct.toEnemyGroup());
+            		init = false;
+            	}
+            	*/
             	if (rc.getHealth() < rc.getType().maxHealth / 10 && !dying) {
             		Broadcast.decrementRobotCount(RobotType.GARDENER); // Broadcast death on low health
             		Broadcast.dying(ID);
@@ -171,12 +178,13 @@ public class Gardener extends RobotPlayer {
             	}
     			
             	// System.out.println("Planted Trees Bytecodes: " + Clock.getBytecodeNum());
-            	
-            	if (rc.senseNearbyTrees(rc.getType().bodyRadius + rc.getType().strideRadius, Team.NEUTRAL).length + rc.senseNearbyTrees(rc.getType().bodyRadius + rc.getType().strideRadius, rc.getTeam().opponent()).length > 0)
+            	if(rc.getTeamBullets() > 200.0) { // && Broadcast.SCOUT_COUNT_INDEX < 2) {
+            		buildRobot(RobotType.SCOUT, buildSequence[sweetSpot]);
+            	} else if (rc.senseNearbyTrees(rc.getType().bodyRadius + rc.getType().strideRadius, Team.NEUTRAL).length + rc.senseNearbyTrees(rc.getType().bodyRadius + rc.getType().strideRadius, rc.getTeam().opponent()).length > 0) {
             		buildRobot(RobotType.LUMBERJACK, buildSequence[sweetSpot]);
-            	else
+            	} else {
             		buildRobot(RobotType.SOLDIER, buildSequence[sweetSpot]);
-            	
+            	}
             	// System.out.println("Built Soldiers Bytecodes: " + Clock.getBytecodeNum());
 
                 Clock.yield();
