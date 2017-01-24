@@ -260,7 +260,7 @@ public class Archon extends RobotPlayer {
                     }
                 }
 
-                if (rc.getTeamBullets() > 10000.0 || rc.getRoundLimit() == rc.getRoundNum())
+                if (rc.getTeamBullets() >= 10000.0 || rc.getRoundLimit() == rc.getRoundNum())
                     rc.donate(rc.getTeamBullets()); // If over 10000 bullets, we win. 
 
                 Clock.yield();
