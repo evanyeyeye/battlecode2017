@@ -94,8 +94,20 @@ public class Scout extends RobotPlayer {
 
 	}
 	
+	public static MapLocation findTree() {
+		TreeInfo[] trees = rc.senseNearbyTrees(RobotType.SCOUT.sensorRadius);
+        if(trees.length > 0) {
+        	for(int i = 0; i < trees.length; i++) {
+        		if(trees[i].getTeam() != rc.getTeam().opponent() && trees[i].getTeam() != rc.getTeam() && rc.canShake(trees[i].getID()) && trees[i].getContainedBullets() > 5) {
+        			return trees[i].getLocation();
+        		}
+        	}
+        }
+        return null;
+	}
+	
 	public static boolean init = true;
-	public static double range = 50.0;
+	//public static double range = 50.0;
 	public static Direction dir = Direction.EAST;
 	
     public static void run(RobotController rc) {
@@ -120,15 +132,33 @@ public class Scout extends RobotPlayer {
             	//double temp = range * 2;
             	dir = randomDirection();
             	//while(range > 0.0) {
-        		MapLocation attackable = findEnemy(); 
+        		MapLocation attackable = findEnemy();
+        		//MapLocation shakeable = findTree();
+        		//if(shakeable != null) {
+        			//tryMove(rc.getLocation().directionTo(shakeable));
+       			 	//rc.shake(shakeable);
+        		TreeInfo[] neutralTrees = rc.senseNearbyTrees(rc.getType().bodyRadius + rc.getType().strideRadius, Team.NEUTRAL);
+                for (int i=0; i < neutralTrees.length; i++) {
+                    MapLocation loc = neutralTrees[i].getLocation();
+                    if (neutralTrees[i].getContainedBullets() > 0 && rc.canShake(neutralTrees[i].getLocation())) {
+                        rc.shake(loc); // Collect free bullets from neutral trees
+                    }
+                    Broadcast.requestLumberjack(loc);
+                }
+        		//}
         		if(attackable != null) {
-        			tryMove(rc.getLocation().directionTo(attackable));
-        			 rc.fireSingleShot(rc.getLocation().directionTo(attackable));
+        			if(rc.getHealth() < 5) {
+        				tryMove(rc.getLocation().directionTo(attackable).opposite());
+        			} else {
+        				tryMove(rc.getLocation().directionTo(attackable));
+        				rc.fireSingleShot(rc.getLocation().directionTo(attackable));
+        			}
         		}
         		if(!rc.onTheMap(rc.getLocation())) {
         			tryMove(dir.rotateLeftDegrees((float) 90.0));
-        		} else if(tryMove(dir)) {
-        			range -= RobotType.SCOUT.strideRadius;
+        		} else {
+        			tryMove(dir);
+        			//range -= RobotType.SCOUT.strideRadius;
         		}
         		Clock.yield();
             	//}
