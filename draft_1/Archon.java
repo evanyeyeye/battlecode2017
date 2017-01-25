@@ -14,7 +14,7 @@ public class Archon extends RobotPlayer {
     static HashSet<Integer>   usedIDs; // = new HashSet<Integer>(1);
     static void fulfillIDRequests() throws GameActionException {
 
-        if(cycle_num < 7) return;
+        if(cycle_num < 8) return;
         Iterator<Integer> it = unusedIDs.iterator();
         for(int i : Broadcast.ID_REQUESTS) {
             int status = rc.readBroadcast(i);
@@ -32,6 +32,8 @@ public class Archon extends RobotPlayer {
     // [400 - 490)
     static HashSet<Integer> dynamicIDs_unallocated; // = new HashSet<Integer>(1);
     static HashSet<Integer> dynamicIDs_allocated; // = new HashSet<Integer>(1);
+
+    static int hasSentSoldiers = 0;
 
     static boolean allocate(int slot, int information) throws GameActionException {
         if(dynamicIDs_allocated.contains(slot)) {
@@ -116,6 +118,7 @@ public class Archon extends RobotPlayer {
                 unusedIDs.add(robot);
                 usedIDs.remove(robot);
                 rc.broadcast(robot, 0);
+                rc.broadcast(Broadcast.SOLDIER_COUNT_INDEX, rc.readBroadcast(Broadcast.SOLDIER_COUNT_INDEX) - 1);
             } else {
                 if(current_code != -1 * reinforcements_slots[sl]) {
                     rc.broadcast(robot, reinforcements_slots[sl]);
@@ -127,6 +130,7 @@ public class Archon extends RobotPlayer {
 
     static int cycle_num = 0;
 
+    static boolean archon_might_be_stuck = false;
     static boolean main_archon = false;
     // Main archon functions:
     // -- index and coordinate robots
@@ -147,7 +151,7 @@ public class Archon extends RobotPlayer {
                 // if Archon has taken damage
                 // rc.broadcast(Broadcast.ARCHON_IN_DISTRESS, 1);
 
-                main_archon = main_archon || Broadcast.checkMainArchon();
+                main_archon = main_archon || (!archon_might_be_stuck && Broadcast.checkMainArchon());
                 if (main_archon) {
                     fulfillIDRequests();
                     fulfillReinforcementsRequests();
@@ -167,21 +171,21 @@ public class Archon extends RobotPlayer {
 
                 }
 
-                if(cycle_num < 7) {
+                if(cycle_num < 8) {
                     switch(cycle_num) {
-                        case 2:
+                        case 3:
                             dynamicIDs_unallocated = new HashSet<Integer>();
                             break;
-                        case 3:
+                        case 4:
                             dynamicIDs_allocated = new HashSet<Integer>();
                             break;
-                        case 4:
+                        case 5:
                             usedIDs = new HashSet<Integer>();
                             break;
-                        case 5:
+                        case 6:
                             unusedIDs = new HashSet<Integer>();
                             break;
-                        case 6:
+                        case 7:
                             for(int i = 500; i<1000; i++) {
                                 unusedIDs.add(i);
                             }
@@ -192,6 +196,10 @@ public class Archon extends RobotPlayer {
                     }
                 }
                 cycle_num++;
+                if(cycle_num > 10 && rc.readBroadcast(Broadcast.GARDENER_COUNT_INDEX) == 0) {
+                    main_archon = false;
+                    archon_might_be_stuck = true;
+                }
 
                 MapLocation archonLocation = rc.getLocation();
 
@@ -249,6 +257,28 @@ public class Archon extends RobotPlayer {
                 // Broadcast archon's location for other robots on the team to know
                 if(main_archon) {
                     // System.out.println("Broadcasting location: " + archonLocation.x + " " + archonLocation.y);
+                    //
+                    if(hasSentSoldiers > 0)
+                        hasSentSoldiers++;
+                    if(hasSentSoldiers > 10) {
+                        hasSentSoldiers = 0;
+                    }
+                    if(hasSentSoldiers == 0) {
+                        if(rc.readBroadcast(Broadcast.SOLDIER_COUNT_INDEX) > 10) {
+                            float x_s = 0.0f;
+                            float y_s = 0.0f;
+                            int num = 0;
+                            for(MapLocation ml : rc.senseBroadcastingRobotLocations()) {
+                                if(ml.distanceTo(archonLocation) > 40) {
+                                    x_s += ml.x;
+                                    y_s += ml.y;
+                                    num++;
+                                }
+                            }
+                            Broadcast.requestReinforcements(new MapLocation(x_s, y_s));
+                            hasSentSoldiers = 1;
+                        }
+                    }
                     rc.broadcast(0,Float.floatToRawIntBits(archonLocation.x));
                     rc.broadcast(1,Float.floatToRawIntBits(archonLocation.y));
                 } else {
@@ -258,12 +288,14 @@ public class Archon extends RobotPlayer {
                         int main_archon_y = rc.readBroadcast(1);
                         MapLocation mainArchonLocation = new MapLocation(Float.intBitsToFloat(main_archon_x), Float.intBitsToFloat(main_archon_y));
                         if(archonLocation.distanceTo(mainArchonLocation) > 9)
-                            tryMove(archonLocation.directionTo(mainArchonLocation);
+                            tryMove(archonLocation.directionTo(mainArchonLocation));
                     }
                 }
 
-                if (rc.getTeamBullets() >= 500.0 || rc.getRoundLimit() == rc.getRoundNum()) {
-                    rc.donate((float) 100.0); // If over 10000 bullets, we win.
+                int roundNum = rc.getRoundNum();
+                int roundLim = rc.getRoundLimit();
+                if (rc.getTeamBullets() >= 800.0 || roundLim == roundNum) {
+                    rc.donate((float)(50 * (7.5 + (20 - 7.5) * (roundNum/roundLim)))); // Donate enough for 20 victory points
                 }
 
                 Clock.yield();
