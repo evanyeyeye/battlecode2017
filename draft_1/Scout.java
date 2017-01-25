@@ -118,7 +118,7 @@ public class Scout extends RobotPlayer {
             	
             	//should detect bullets and find where to move to instead; implement in dodge()
             	//double temp = range * 2;
-            	dir = dir.rotateLeftDegrees((float) 45.0);
+            	dir = randomDirection();
             	//while(range > 0.0) {
         		MapLocation attackable = findEnemy(); 
         		if(attackable != null) {

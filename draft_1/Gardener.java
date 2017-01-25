@@ -178,12 +178,14 @@ public class Gardener extends RobotPlayer {
             	}
     			
             	// System.out.println("Planted Trees Bytecodes: " + Clock.getBytecodeNum());
-            	if(rc.getTeamBullets() > 100.0 && Broadcast.getRobotCount(RobotType.SCOUT) < 20) {
-            		buildRobot(RobotType.SCOUT, buildSequence[sweetSpot]);
-            	} else if (rc.senseNearbyTrees(rc.getType().bodyRadius + rc.getType().strideRadius, Team.NEUTRAL).length + rc.senseNearbyTrees(rc.getType().bodyRadius + rc.getType().strideRadius, rc.getTeam().opponent()).length > 0) {
-            		buildRobot(RobotType.LUMBERJACK, buildSequence[sweetSpot]);
-            	} else {
-            		buildRobot(RobotType.SOLDIER, buildSequence[sweetSpot]);
+            	if(rc.senseNearbyRobots(-1, rc.getTeam().opponent()).length > 1) {
+	            	if(rc.getTeamBullets() > 100.0 && Broadcast.getRobotCount(RobotType.SCOUT) < 20) {
+	            		buildRobot(RobotType.SCOUT, buildSequence[sweetSpot]);
+	            	} else if (rc.senseNearbyTrees(rc.getType().bodyRadius + rc.getType().strideRadius, Team.NEUTRAL).length + rc.senseNearbyTrees(rc.getType().bodyRadius + rc.getType().strideRadius, rc.getTeam().opponent()).length > 0) {
+	            		buildRobot(RobotType.LUMBERJACK, buildSequence[sweetSpot]);
+	            	} else {
+	            		buildRobot(RobotType.SOLDIER, buildSequence[sweetSpot]);
+	            	}
             	}
             	// System.out.println("Built Soldiers Bytecodes: " + Clock.getBytecodeNum());
 
