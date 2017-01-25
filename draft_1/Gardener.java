@@ -135,17 +135,17 @@ public class Gardener extends RobotPlayer {
 
                 if (!foundHome) { // escaping homelessness
 
+                	if (rc.senseNearbyTrees(rc.getType().bodyRadius + rc.getType().sensorRadius, Team.NEUTRAL).length + rc.senseNearbyTrees(rc.getType().bodyRadius + rc.getType().sensorRadius, rc.getTeam().opponent()).length > 0
+                            && Broadcast.getRobotCount(RobotType.LUMBERJACK) < 1)
+                        for (int i=0; i<buildSequence.length; i++)
+                            if (buildRobot(RobotType.LUMBERJACK, buildSequence[i]))
+                                break;
+                	
                     if (rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent()).length > 0
                             || rc.senseNearbyBullets(rc.getType().bulletSightRadius).length > 0
                             || Broadcast.getRobotCount(RobotType.SOLDIER) + Broadcast.getRobotCount(RobotType.LUMBERJACK) < 1) // Emergency robot requirement scenarios
                         for (int i=0; i<buildSequence.length; i++)
                             if (buildRobot(RobotType.SOLDIER, buildSequence[i]))
-                                break;
-
-                    if (rc.senseNearbyTrees(rc.getType().bodyRadius + rc.getType().sensorRadius, Team.NEUTRAL).length + rc.senseNearbyTrees(rc.getType().bodyRadius + rc.getType().sensorRadius, rc.getTeam().opponent()).length > 0
-                            && Broadcast.getRobotCount(RobotType.LUMBERJACK) < 1)
-                        for (int i=0; i<buildSequence.length; i++)
-                            if (buildRobot(RobotType.LUMBERJACK, buildSequence[i]))
                                 break;
 
                     for (int i=0; i<buildSequence.length; i++) {
