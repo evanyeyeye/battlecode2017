@@ -104,7 +104,6 @@ public class Scout extends RobotPlayer {
 
         System.out.println("Scout: Spawn");
         Team enemy = rc.getTeam().opponent();
-
         // The code you want your robot to perform every round should be in this loop
         while (true) {
 
@@ -118,22 +117,22 @@ public class Scout extends RobotPlayer {
             	*/
             	
             	//should detect bullets and find where to move to instead; implement in dodge()
-            	double temp = range * 2;
+            	//double temp = range * 2;
             	dir = dir.rotateLeftDegrees((float) 45.0);
-            	while(range > 0.0) {
-            		MapLocation attackable = findEnemy(); 
-            		if(attackable != null) {
-            			 rc.fireSingleShot(rc.getLocation().directionTo(attackable));
-            			 tryMove(rc.getLocation().directionTo(attackable).rotateLeftDegrees((float) 90));
-            		}
-            		if(!rc.onTheMap(rc.getLocation())) {
-            			tryMove(dir.rotateLeftDegrees((float) 45.0));
-            		} else if(tryMove(dir)) {
-            			range -= RobotType.SCOUT.strideRadius;
-            		}
-            		Clock.yield();
-            	}
-            	range = temp;
+            	//while(range > 0.0) {
+        		MapLocation attackable = findEnemy(); 
+        		if(attackable != null) {
+        			tryMove(rc.getLocation().directionTo(attackable));
+        			 rc.fireSingleShot(rc.getLocation().directionTo(attackable));
+        		}
+        		if(!rc.onTheMap(rc.getLocation())) {
+        			tryMove(dir.rotateLeftDegrees((float) 90.0));
+        		} else if(tryMove(dir)) {
+        			range -= RobotType.SCOUT.strideRadius;
+        		}
+        		Clock.yield();
+            	//}
+            	//range = temp;
                 /*else {
                     // No close robots, so search for robots within sight radius
                     robots = rc.senseNearbyRobots(-1,enemy);
