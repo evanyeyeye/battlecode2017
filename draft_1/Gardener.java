@@ -53,13 +53,13 @@ public class Gardener extends RobotPlayer {
 
         int openCount = 0; // number of directions that are not blocked by objects
         boolean openPath = false; // since no path finding implementation yet, I say if a path is open 2 strides in a row, there is an open path
-        int tempSweetSpot = 0; // 0 by default, set in createBuildDirSequence()
+        int tempSweetSpot = 4; // 4 by default, set in createBuildDirSequence()
         for (int i=0; i<buildSequence.length; i++) {
             rc.setIndicatorDot(rc.getLocation().add(buildSequence[i], rc.getType().bodyRadius + rc.getType().strideRadius), 0, 0, 0);
             if (rc.onTheMap(rc.getLocation().add(buildSequence[i], rc.getType().bodyRadius + rc.getType().strideRadius), rc.getType().bodyRadius)
                     && !rc.isCircleOccupiedExceptByThisRobot(rc.getLocation().add(buildSequence[i], rc.getType().bodyRadius + rc.getType().strideRadius), rc.getType().bodyRadius)) {
                 openCount++;
-                if (!openPath) { // structured awkwardly in order to reduce expensive bytecode operations
+                if (!openPath || i == 4) { // structured awkwardly in order to reduce expensive bytecode operations
                     openPath = rc.onTheMap(rc.getLocation().add(buildSequence[i], rc.getType().bodyRadius + rc.getType().strideRadius + 1.0f), rc.getType().bodyRadius)
                         && !rc.isCircleOccupiedExceptByThisRobot(rc.getLocation().add(buildSequence[i], rc.getType().bodyRadius + rc.getType().strideRadius + 1.0f), rc.getType().bodyRadius);
                     if (openPath)
@@ -93,6 +93,7 @@ public class Gardener extends RobotPlayer {
         buildSequence = createBuildDirSequence();
 
         boolean foundHome = testHome(); // :(
+		int spawnRound = rc.getRoundNum();
 
         while (true) {
 
@@ -159,7 +160,7 @@ public class Gardener extends RobotPlayer {
 
                     // System.out.println("Tested Home Bytecodes: " + Clock.getBytecodeNum());
 
-                    foundHome = testHome();
+                    foundHome = testHome() || rc.getRoundNum() > spawnRound + 50;
                     if (!foundHome) { // A little weird, but if testHome() is true than process below code without waiting for another loop.
                         Clock.yield();
                         continue;
@@ -178,14 +179,13 @@ public class Gardener extends RobotPlayer {
                 }
 
                 // System.out.println("Planted Trees Bytecodes: " + Clock.getBytecodeNum());
-                if(rc.senseNearbyRobots(-1, rc.getTeam().opponent()).length > 1) {
-                    if(rc.getTeamBullets() > 100.0 && Broadcast.getRobotCount(RobotType.SCOUT) < 20) {
-                        buildRobot(RobotType.SCOUT, buildSequence[sweetSpot]);
-                    } else if (rc.senseNearbyTrees(rc.getType().bodyRadius + rc.getType().strideRadius, Team.NEUTRAL).length + rc.senseNearbyTrees(rc.getType().bodyRadius + rc.getType().strideRadius, rc.getTeam().opponent()).length > 0) {
-                        buildRobot(RobotType.LUMBERJACK, buildSequence[sweetSpot]);
-                    } else {
-                        buildRobot(RobotType.SOLDIER, buildSequence[sweetSpot]);
-                    }
+                /*if(rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent()).length < 1 && rc.senseNearbyBullets(rc.getType().bulletSightRadius).length < 1 && rc.getRoundNum() < rc.getRoundLimit() / 10) {
+                    buildRobot(RobotType.SCOUT, buildSequence[sweetSpot]);
+                }*/
+                if (rc.senseNearbyTrees(rc.getType().bodyRadius + rc.getType().strideRadius, Team.NEUTRAL).length + rc.senseNearbyTrees(rc.getType().bodyRadius + rc.getType().strideRadius, rc.getTeam().opponent()).length > 0) {
+                    buildRobot(RobotType.LUMBERJACK, buildSequence[sweetSpot]);
+                } else {
+                    buildRobot(RobotType.SOLDIER, buildSequence[sweetSpot]);
                 }
                 // System.out.println("Built Soldiers Bytecodes: " + Clock.getBytecodeNum());
 

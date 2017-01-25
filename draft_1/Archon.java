@@ -164,7 +164,7 @@ public class Archon extends RobotPlayer {
 
                 if (rc.canHireGardener(dir) && (Broadcast.getRobotCount(RobotType.GARDENER) < 3 || Broadcast.getRobotCount(RobotType.GARDENER) < Broadcast.getRobotCount(RobotType.SOLDIER) / 2)
                         && (rc.onTheMap(rc.getLocation().add(dir, rc.getType().bodyRadius + rc.getType().strideRadius + (float)2.0), rc.getType().bodyRadius)
-                            && !rc.isCircleOccupiedExceptByThisRobot(rc.getLocation().add(dir, rc.getType().bodyRadius + rc.getType().strideRadius + (float)2.0), rc.getType().bodyRadius))) {
+                            && (Broadcast.getRobotCount(RobotType.GARDENER) == 0 || !rc.isCircleOccupiedExceptByThisRobot(rc.getLocation().add(dir, rc.getType().bodyRadius + rc.getType().strideRadius + (float)2.0), rc.getType().bodyRadius)))) {
 
                     rc.hireGardener(dir); // temporary check (TODO: DOESNT WORK ON TIGHT MAPS) until gardeners become legit
                     Broadcast.incrementRobotCount(RobotType.GARDENER);

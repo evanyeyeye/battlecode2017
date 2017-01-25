@@ -116,10 +116,9 @@ public class Scout extends RobotPlayer {
 
         System.out.println("Scout: Spawn");
         Team enemy = rc.getTeam().opponent();
-        // The code you want your robot to perform every round should be in this loop
+        
         while (true) {
 
-            // Try/catch blocks stop unhandled exceptions, which cause your robot to explode
             try {
             	/*double minMapSize[] = new double[2];
             	if(init) {
@@ -189,7 +188,7 @@ public class Scout extends RobotPlayer {
                 // Clock.yield() makes the robot wait until the next turn, then it will perform this loop again
                 
             } catch (Exception e) {
-                System.out.println("ScoutLsssssss: Exception");
+                System.out.println("Scout: Exception");
                 e.printStackTrace();
             }
         }
