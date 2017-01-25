@@ -137,8 +137,8 @@ public class Archon extends RobotPlayer {
 
     public static void run(RobotController rc) throws GameActionException {
 
-    	System.out.println("Archon Spawn: " + rc.getID());
-    	
+        System.out.println("Archon Spawn: " + rc.getID());
+
         RobotPlayer.rc = rc;
 
         while (true) {
@@ -154,16 +154,18 @@ public class Archon extends RobotPlayer {
                 }
 
                 System.out.println("cycle: " + cycle_num);
-                
-                // Build gardeners 
+
+                // Build gardeners
                 Direction dir = randomDirection();
 
                 if (rc.canHireGardener(dir) && (Broadcast.getRobotCount(RobotType.GARDENER) < 3 || Broadcast.getRobotCount(RobotType.GARDENER) < Broadcast.getRobotCount(RobotType.SOLDIER) / 2)
-                	&& (rc.onTheMap(rc.getLocation().add(dir, rc.getType().bodyRadius + rc.getType().strideRadius + (float)2.0), rc.getType().bodyRadius) 
-					&& !rc.isCircleOccupiedExceptByThisRobot(rc.getLocation().add(dir, rc.getType().bodyRadius + rc.getType().strideRadius + (float)2.0), rc.getType().bodyRadius))) {
-            		rc.hireGardener(dir); // temporary check (TODO: DOESNT WORK ON TIGHT MAPS) until gardeners become legit
-            		Broadcast.incrementRobotCount(RobotType.GARDENER);
-                } 
+                        && (rc.onTheMap(rc.getLocation().add(dir, rc.getType().bodyRadius + rc.getType().strideRadius + (float)2.0), rc.getType().bodyRadius)
+                            && !rc.isCircleOccupiedExceptByThisRobot(rc.getLocation().add(dir, rc.getType().bodyRadius + rc.getType().strideRadius + (float)2.0), rc.getType().bodyRadius))) {
+
+                    rc.hireGardener(dir); // temporary check (TODO: DOESNT WORK ON TIGHT MAPS) until gardeners become legit
+                    Broadcast.incrementRobotCount(RobotType.GARDENER);
+
+                }
 
                 if(cycle_num < 7) {
                     switch(cycle_num) {
@@ -190,7 +192,7 @@ public class Archon extends RobotPlayer {
                     }
                 }
                 cycle_num++;
-                
+
                 MapLocation archonLocation = rc.getLocation();
 
                 float x = 0.0f;
@@ -254,14 +256,15 @@ public class Archon extends RobotPlayer {
                     if(main_archon_x != 0) {
                         // Group up Archons
                         int main_archon_y = rc.readBroadcast(1);
-                        tryMove(archonLocation.directionTo(
-                                    new MapLocation(Float.intBitsToFloat(main_archon_x),
-                                        Float.intBitsToFloat(main_archon_y))));
+                        MapLocation mainArchonLocation = new MapLocation(Float.intBitsToFloat(main_archon_x), Float.intBitsToFloat(main_archon_y));
+                        if(archonLocation.distanceTo(mainArchonLocation) > 9)
+                            tryMove(archonLocation.directionTo(mainArchonLocation);
                     }
                 }
 
-                if (rc.getTeamBullets() >= 500.0 || rc.getRoundLimit() == rc.getRoundNum())
-                    rc.donate((float) 100.0); // If over 10000 bullets, we win. 
+                if (rc.getTeamBullets() >= 500.0 || rc.getRoundLimit() == rc.getRoundNum()) {
+                    rc.donate((float) 100.0); // If over 10000 bullets, we win.
+                }
 
                 Clock.yield();
 
@@ -269,7 +272,5 @@ public class Archon extends RobotPlayer {
                 e.printStackTrace();
             }
         }
-
     }
-
 }

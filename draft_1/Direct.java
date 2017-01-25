@@ -26,32 +26,32 @@ public class Direct {
     }
 
     /*public static Direction directionToRobot(RobotInfo robot) {
-    	return new Direction((float)Math.atan((robot.location.x-rc.getLocation().x)/(robot.location.y-rc.getLocation().y)));
-    }*/
-    
+      return new Direction((float)Math.atan((robot.location.x-rc.getLocation().x)/(robot.location.y-rc.getLocation().y)));
+      }*/
+
     public static boolean retreat(){
-    	 return rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam()).length < rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent()).length;
+        return rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam()).length < rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent()).length;
     }
-    
+
     /*public static void dodge() {
-    	BulletInfo[] bulletLocations = rc.senseNearbyBullets();
-    	int left = 0;
-    	int right = 0;
-    	int up = 0;
-    	int down = 0;
-    	for(int i = 0; i < bulletLocations.length; i++) {
-    		if(willCollideWithMe(bulletLocations[i])) {
-    			//tryMove(new Direction((float)Math.atan((bulletLocations[i].location.x-rc.getLocation().x)/(bulletLocations[i].location.y-rc.getLocation().y))).opposite());
-    			if(toLeft(rc.getLocation(), bulletLocations[i])) {
-    				
-    			}
-    			tryMove(rc.getLocation().directionTo(bulletLocations[i].location).opposite();
-    			
-    		}
-    	}
-    }*/
-    
-   
+      BulletInfo[] bulletLocations = rc.senseNearbyBullets();
+      int left = 0;
+      int right = 0;
+      int up = 0;
+      int down = 0;
+      for(int i = 0; i < bulletLocations.length; i++) {
+      if(willCollideWithMe(bulletLocations[i])) {
+    //tryMove(new Direction((float)Math.atan((bulletLocations[i].location.x-rc.getLocation().x)/(bulletLocations[i].location.y-rc.getLocation().y))).opposite());
+    if(toLeft(rc.getLocation(), bulletLocations[i])) {
+
+    }
+    tryMove(rc.getLocation().directionTo(bulletLocations[i].location).opposite();
+
+      }
+      }
+      }*/
+
+
     static boolean tryMove(Direction dir) throws GameActionException {
         return tryMove(dir,20,3);
     }
@@ -66,8 +66,8 @@ public class Direct {
      * @throws GameActionException
      */
     static boolean tryMove(Direction dir, float degreeOffset, int checksPerSide) throws GameActionException {
-    	if (rc.hasMoved())
-    		return false;
+        if (rc.hasMoved())
+            return false;
         // First, try intended direction
         if (rc.canMove(dir)) {
             rc.move(dir);
@@ -128,7 +128,7 @@ public class Direct {
 
         return (perpendicularDist <= rc.getType().bodyRadius);
     }
-    
+
     public static boolean willCollideWithMeLeft(BulletInfo bullet) {
         MapLocation myLocation = rc.getLocation();
 
@@ -154,7 +154,7 @@ public class Direct {
 
         return (perpendicularDist <= rc.getType().bodyRadius);
     }
-    
+
     public static boolean willCollideWithMeRight(BulletInfo bullet) {
         MapLocation myLocation = rc.getLocation();
 
