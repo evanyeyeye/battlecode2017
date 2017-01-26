@@ -8,5 +8,5 @@ public class Utility {
     public static void initUtility(RobotController r) {
         rc = r;
     }
-    
+
 }

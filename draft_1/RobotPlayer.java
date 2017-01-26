@@ -9,12 +9,12 @@ public strictfp class RobotPlayer {
 
     @SuppressWarnings("unused")
     public static void run(RobotController rc) throws GameActionException {
-    	
+
         Broadcast.initBroadcaster(rc);
         Direct.initDirector(rc);
-        
+
         enemyArchonLocations = rc.getInitialArchonLocations(rc.getTeam().opponent());
-        
+
         switch (rc.getType()) {
             case ARCHON:
                 Archon.run(rc);
@@ -35,8 +35,8 @@ public strictfp class RobotPlayer {
                 Scout.run(rc);
                 break;
         }
-	}
-    
+    }
+
     /*
      * @return a random Direction
      */
@@ -64,8 +64,8 @@ public strictfp class RobotPlayer {
      */
     public static boolean tryMove(Direction dir, float degreeOffset, int checksPerSide) throws GameActionException {
 
-    	if (rc.hasMoved())
-    		return false;
+        if (rc.hasMoved())
+            return false;
 
         // First, try intended direction
         if (rc.canMove(dir)) {

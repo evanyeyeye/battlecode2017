@@ -23,10 +23,10 @@ public class Soldier extends RobotPlayer {
     // [500,999] == ID established
 
     public static void run(RobotController rc) throws GameActionException {
-        
-    	RobotPlayer.rc = rc;
-    	System.out.println("Soldier: Spawn");
-    	
+
+        RobotPlayer.rc = rc;
+        System.out.println("Soldier: Spawn");
+
         Team enemy = rc.getTeam().opponent();
         Team ally  = rc.getTeam();
 
@@ -35,17 +35,17 @@ public class Soldier extends RobotPlayer {
             try {
 
                 if (rc.getHealth() < rc.getType().maxHealth / 10 && !dying) {
-                	Broadcast.decrementRobotCount(RobotType.GARDENER); // Broadcast death on low health
-            		Broadcast.dying(ID);
-            		ID = -ID; // render ID unusable
+                    Broadcast.decrementRobotCount(RobotType.GARDENER); // Broadcast death on low health
+                    Broadcast.dying(ID);
+                    ID = -ID; // render ID unusable
                     dying = true; // code will not enter this if statement again
                 }
-                
+
                 if(ID < 500 && !dying) {
                     ID = Broadcast.requestID(ID);
                 }
 
-                
+
                 float archon_x = Float.intBitsToFloat(rc.readBroadcast(
                             Broadcast.MAIN_ARCHON_POSITION[0]));
                 float archon_y = Float.intBitsToFloat(rc.readBroadcast(
@@ -60,12 +60,12 @@ public class Soldier extends RobotPlayer {
                         tryMove(myLocation.directionTo(archonLocation));
                     }
                 }
-                
+
                 TreeInfo[] neutralTrees = rc.senseNearbyTrees(rc.getType().bodyRadius + rc.getType().strideRadius, Team.NEUTRAL);
-            	for (int i=0; i<neutralTrees.length; i++) {
+                for (int i=0; i<neutralTrees.length; i++) {
                     MapLocation loc = neutralTrees[i].getLocation();
-            		if (neutralTrees[i].getContainedBullets() > 0 && rc.canShake(neutralTrees[i].getLocation())) {
-            			rc.shake(loc); // Collect free bullets from neutral trees
+                    if (neutralTrees[i].getContainedBullets() > 0 && rc.canShake(neutralTrees[i].getLocation())) {
+                        rc.shake(loc); // Collect free bullets from neutral trees
                     }
                     Broadcast.requestLumberjack(loc);
                 }
@@ -93,7 +93,7 @@ public class Soldier extends RobotPlayer {
                                         rc.broadcast(ID, code*-1);
                                         break;
                                     }
-                                    
+
                                     tryMove(myLocation.directionTo(requestedLocation));
                                 }
                                 break;
@@ -113,7 +113,7 @@ public class Soldier extends RobotPlayer {
                         Broadcast.alertArchon(myLocation);
                     }
                     if (Direct.retreat() && rc.canFirePentadShot()) {
-                    	boolean shoot = true;
+                        boolean shoot = true;
                         Direction towardsEn = null;
                         for(RobotInfo en : robots) {
                             towardsEn = myLocation.directionTo(en.location);
@@ -137,8 +137,8 @@ public class Soldier extends RobotPlayer {
                             tryMove(towardsEn);
                         }
                     }
-                   	else if (friendlies.length > robots.length * 2 && rc.canFireSingleShot()) {
-                   		boolean shoot = true;
+                    else if (friendlies.length > robots.length * 2 && rc.canFireSingleShot()) {
+                        boolean shoot = true;
                         Direction towardsEn = null;
                         for(RobotInfo en : robots) {
                             towardsEn = myLocation.directionTo(en.location);
@@ -161,7 +161,7 @@ public class Soldier extends RobotPlayer {
                         if(!shoot && towardsEn != null) {
                             tryMove(towardsEn);
                         }
-                   	}
+                    }
                     else if (rc.canFireTriadShot()) {
                         // ...Then fire a bullet in the direction of the enemy.
                         boolean shoot = true;
