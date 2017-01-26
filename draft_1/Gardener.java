@@ -87,6 +87,7 @@ public class Gardener extends RobotPlayer {
 
     	RobotPlayer.rc = rc;
     	System.out.println("Gardener: Spawn");
+        int spawnRound = rc.getRoundNum();
     	
         buildSequence = createBuildDirSequence();
         
@@ -152,7 +153,7 @@ public class Gardener extends RobotPlayer {
             		
             		// System.out.println("Tested Home Bytecodes: " + Clock.getBytecodeNum());
             		
-            		foundHome = testHome();
+            		foundHome = testHome() || rc.getRoundNum() < spawnRound + 50;
             		if (!foundHome) { // A little weird, but if testHome() is true than process below code without waiting for another loop.
             			Clock.yield();
             			continue;

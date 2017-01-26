@@ -122,7 +122,7 @@ public class Lumberjack extends RobotPlayer {
                 			break;
                 		}
                 	}
-                if (!rc.hasAttacked()) // nested if statement to avoid both using bytecodes (senseNearbyTrees) and to avoid unnecessary for loop
+                if (!rc.hasAttacked())
                 	for (int i=0; i<neutralTrees.length; i++) { // if nothing in your robot life worked so far you can be sad and chop normal trees
                 		MapLocation neutralTreeLocation = neutralTrees[i].getLocation();
                 		if (rc.canChop(neutralTreeLocation)) {
