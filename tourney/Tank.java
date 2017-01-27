@@ -1,96 +1,56 @@
-package draft_1;
+package tourney;
 import battlecode.common.*;
 
-public class Soldier extends RobotPlayer {
+public class Tank extends RobotPlayer {
 
-    static boolean dying = false;
+    public static int ID = 0;
 
-    static int ID = 0;
+    public static boolean dying = false;
 
-    /*
-     * SOLDIER SPECIFIC CODES
-     */
-
-    final public static int REINFORCE = 1;
-    final static int RETURN_TO_ARCHON = 1001; // not implemented
-
-    /*
-     * END SOLDIER SPECIFIC CODES
-     */
-
-    // 0 == Need ID
-    // [490,499] == ID request processing
-    // [500,999] == ID established
-
-    public static void run(RobotController rc) throws GameActionException {
+    public static void run(RobotController rc) { // if we get a tank from a tree
 
         RobotPlayer.rc = rc;
-        System.out.println("Soldier: Spawn");
 
-        Team enemy = rc.getTeam().opponent();
-        Team ally  = rc.getTeam();
+        System.out.println("Tank: Spawn");
 
         while (true) {
 
             try {
 
                 if (rc.getHealth() < rc.getType().maxHealth / 10 && !dying) {
-                    Broadcast.decrementRobotCount(RobotType.GARDENER); // Broadcast death on low health
                     Broadcast.dying(ID);
                     ID = -ID; // render ID unusable
                     dying = true; // code will not enter this if statement again
                 }
 
-                if(ID < 500 && !dying) {
+                if(ID < 500 && !dying)
                     ID = Broadcast.requestID(ID);
-                }
-
-
-                float archon_x = Float.intBitsToFloat(rc.readBroadcast(
-                            Broadcast.MAIN_ARCHON_POSITION[0]));
-                float archon_y = Float.intBitsToFloat(rc.readBroadcast(
-                            Broadcast.MAIN_ARCHON_POSITION[1]));
 
                 MapLocation myLocation = rc.getLocation();
+                MapLocation archonLocation = new MapLocation(
+                        (rc.readBroadcast(Broadcast.MAIN_ARCHON_POSITION[0])), Float.intBitsToFloat(rc.readBroadcast(Broadcast.MAIN_ARCHON_POSITION[1])));
 
-                MapLocation archonLocation = new MapLocation(archon_x, archon_y);
                 float distanceToArchon = myLocation.distanceTo(archonLocation);
-                if(Broadcast.checkMainArchonDistress() || dying) {
-                    if(distanceToArchon > 15) {
-                        tryMove(myLocation.directionTo(archonLocation));
-                    }
-                }
 
-                TreeInfo[] neutralTrees = rc.senseNearbyTrees(rc.getType().bodyRadius + rc.getType().strideRadius, Team.NEUTRAL);
-                for (int i=0; i<neutralTrees.length; i++) {
-                    MapLocation loc = neutralTrees[i].getLocation();
-                    if (neutralTrees[i].getContainedBullets() > 0 && rc.canShake(neutralTrees[i].getLocation())) {
-                        rc.shake(loc); // Collect free bullets from neutral trees
-                    }
-                }
-                
                 if(ID > 500) {
 
                     int code = rc.readBroadcast(ID);
-                    // code <= 0 means the action has been disabled
-                    // or no action has been transmitted
+                    // code <= 0 means the action has been disabled or no action has been transmitted
                     if(code > 0 && Broadcast.isDynamicChannelCode(code)) {
                         int[] coordinates = Broadcast.readDynamicChannelCode2(code);
-                        int x = rc.readBroadcast(coordinates[0]);
-                        int y = rc.readBroadcast(coordinates[1]);
-                        float x_f = Float.intBitsToFloat(x);
-                        float y_f = Float.intBitsToFloat(y);
+                        float x = Float.intBitsToFloat(rc.readBroadcast(coordinates[0]));
+                        float y = Float.intBitsToFloat(rc.readBroadcast(coordinates[1]));
                         int type = coordinates[2];
                         switch (type) {
-                            case REINFORCE:
-                                if(Direct.retreat())
+                            case 1: // (REINFORCE), don't want to waste bullets with tank, might as well have it act as a tank then
+                                if (Direct.retreat())
                                     tryMove(myLocation.directionTo(archonLocation));
                                 else {
-                                    System.out.println("Responding to reinforcement request at: " + x_f +  " " + y_f);
-                                    MapLocation requestedLocation = new MapLocation(x_f, y_f);
+                                    System.out.println("Responding to reinforcement request at: " + x +  " " + y);
+                                    MapLocation requestedLocation = new MapLocation(x, y);
 
                                     if(myLocation.distanceTo(requestedLocation) < 4) {
-                                        rc.broadcast(ID, code*-1);
+                                        rc.broadcast(ID, code * -1);
                                         break;
                                     }
 
@@ -100,6 +60,9 @@ public class Soldier extends RobotPlayer {
                         }
                     }
                 }
+
+                Team enemy = rc.getTeam().opponent();
+                Team ally  = rc.getTeam();
 
                 // See if there are any nearby enemy robots
                 RobotInfo[] robots = rc.senseNearbyRobots(rc.getType().sensorRadius, enemy);
@@ -154,6 +117,7 @@ public class Soldier extends RobotPlayer {
                             }
                             if(shoot && towardsEn != null) {
                                 rc.fireSingleShot(towardsEn);
+
                                 tryMove(towardsEn.opposite());
                                 break;
                             }
@@ -190,26 +154,10 @@ public class Soldier extends RobotPlayer {
                     }
                 }
 
-                if(Direct.retreat())
-                    tryMove(myLocation.directionTo(archonLocation));
-                else {
-                    if(!Broadcast.anyReinforcementsRequests()) {
-                        if(distanceToArchon < 30) {
-                            int len = RobotPlayer.enemyArchonLocations.length;
-                            if(len > 0) {
-                                int index = (int)(Math.random() * len);
-                                tryMove(myLocation.directionTo(RobotPlayer.enemyArchonLocations[index]));
-                            }
-                        } else {
-                            tryMove(myLocation.directionTo(archonLocation));
-                        }
-                    }
-                }
-
                 Clock.yield();
 
             } catch (Exception e) {
-                System.out.println("Soldier: Exception");
+                System.out.println("Tank: Exception");
                 e.printStackTrace();
             }
         }

@@ -1,4 +1,4 @@
-package draft_1;
+package tourney;
 import battlecode.common.*;
 
 public strictfp class RobotPlayer {
