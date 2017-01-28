@@ -15,9 +15,9 @@ public class Gardener extends RobotPlayer {
         if (rc.getTeam() == Team.A) // Team A usually faces right
             for (int i=0; i<dirSequence.length; i++)
                 dirSequence[i] = new Direction((float)(Math.PI / 3 * i));
-        else if (rc.getTeam() == Team.B) // and Team B usually faces right
+        else if (rc.getTeam() == Team.B) // and Team B usually faces left
             for (int i=0; i<dirSequence.length; i++)
-                dirSequence[i] = new Direction((float)(Math.PI - (Math.PI / 3 * i)));
+                dirSequence[i] = new Direction((float)((2*Math.PI - (Math.PI / 3 * (i+1)))));
 
         return dirSequence;
     }
@@ -38,7 +38,11 @@ public class Gardener extends RobotPlayer {
 
         return false;
     }
-
+    
+    /*
+     * find a home for the Gardener
+     * @return true if found home
+     */
     public static boolean testHome() throws GameActionException {
 
         // System.out.println("Begin Test Home");
@@ -80,11 +84,11 @@ public class Gardener extends RobotPlayer {
 
     public static boolean dying = false;
 
-    public static Direction[] buildSequence; // Initiate gardener building sequence
+    public static Direction[] buildSequence; // Declare gardener building sequence
     public static int sweetSpot; // Opening for robot production
-
-    public static boolean init = true;
-
+    
+    public static MapLocation targetLocation = null;
+    
     public static void run(RobotController rc) throws GameActionException {
 
     	RobotPlayer.rc = rc;
@@ -108,14 +112,14 @@ public class Gardener extends RobotPlayer {
                     dying = true; // code will not enter this if statement again
                 }
 
-                TreeInfo[] neutralTrees = rc.senseNearbyTrees(rc.getType().bodyRadius + rc.getType().strideRadius, Team.NEUTRAL);
+                TreeInfo[] neutralTrees = rc.senseNearbyTrees(INTERACT_RADIUS, Team.NEUTRAL);
                 for (int i=0; i<neutralTrees.length; i++)
                     if (neutralTrees[i].getContainedBullets() > 0 && rc.canShake(neutralTrees[i].getLocation()))
                         rc.shake(neutralTrees[i].getLocation()); // Collect free bullets from neutral trees
 
                 // System.out.println("Shook Trees Bytecodes: " + Clock.getBytecodeNum());
 
-                TreeInfo[] closeTrees = rc.senseNearbyTrees(rc.getType().bodyRadius + rc.getType().strideRadius, rc.getTeam());
+                TreeInfo[] closeTrees = rc.senseNearbyTrees(INTERACT_RADIUS, rc.getTeam());
                 if (closeTrees.length > 0) {
                     TreeInfo treeToWater = closeTrees[0];
                     float minHealth = closeTrees[0].getHealth();
@@ -131,13 +135,12 @@ public class Gardener extends RobotPlayer {
 
                 if (!foundHome) { // escaping homelessness
 
-                	if (rc.senseNearbyTrees(rc.getType().bodyRadius + rc.getType().sensorRadius, Team.NEUTRAL).length + rc.senseNearbyTrees(rc.getType().bodyRadius + rc.getType().sensorRadius, rc.getTeam().opponent()).length > 0
-                            && Broadcast.getRobotCount(RobotType.LUMBERJACK) < 1)
+                	if (rc.senseNearbyTrees(SENSE_RADIUS, rc.getTeam().opponent()).length + rc.senseNearbyTrees(SENSE_RADIUS, Team.NEUTRAL).length - rc.senseNearbyTrees(INTERACT_RADIUS, rc.getTeam()).length > 0
+                			&& Broadcast.getRobotCount(RobotType.LUMBERJACK) < Broadcast.getRobotCount(RobotType.GARDENER))
                         for (int i=0; i<buildSequence.length; i++)
-                            if (buildRobot(RobotType.LUMBERJACK, buildSequence[i])) {
+                            if (buildRobot(RobotType.LUMBERJACK, buildSequence[i])) 
                             	break;
-                            }           
-                	
+                                       
                     if (rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent()).length > 0
                             || rc.senseNearbyBullets(rc.getType().bulletSightRadius).length > 0
                             || Broadcast.getRobotCount(RobotType.SOLDIER) + Broadcast.getRobotCount(RobotType.LUMBERJACK) < 1) // Emergency robot requirement scenarios
@@ -145,13 +148,15 @@ public class Gardener extends RobotPlayer {
                             if (buildRobot(RobotType.SOLDIER, buildSequence[i]))
                                 break;
 
-                    if ((rc.senseNearbyRobots(-1, rc.getTeam().opponent()).length < 20
+                    /*
+                        if ((rc.senseNearbyRobots(-1, rc.getTeam().opponent()).length < 20
                             && rc.senseNearbyBullets(rc.getType().bulletSightRadius).length < 5)
                             && Broadcast.getRobotCount(RobotType.SCOUT) < 2 && 
                             (Broadcast.getRobotCount(RobotType.SOLDIER) > 1 || Broadcast.getRobotCount(RobotType.LUMBERJACK) > 1))
                         for (int i=0; i<buildSequence.length; i++)
                             if (buildRobot(RobotType.SCOUT, buildSequence[i]))
                                 break;
+                    */
                     
                     for (int i=0; i<buildSequence.length; i++) {
                         if (rc.hasMoved())
@@ -183,6 +188,7 @@ public class Gardener extends RobotPlayer {
                 }
 
                 // System.out.println("Planted Trees Bytecodes: " + Clock.getBytecodeNum());
+                
                 /*if(rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent()).length < 1 && rc.senseNearbyBullets(rc.getType().bulletSightRadius).length < 1 && rc.getRoundNum() < rc.getRoundLimit() / 10) {
                     buildRobot(RobotType.SCOUT, buildSequence[sweetSpot]);
                 }*/
@@ -191,6 +197,7 @@ public class Gardener extends RobotPlayer {
                 } else {
                     buildRobot(RobotType.SOLDIER, buildSequence[sweetSpot]);
                 }
+                
                 // System.out.println("Built Soldiers Bytecodes: " + Clock.getBytecodeNum());
 
                 Clock.yield();

@@ -8,6 +8,8 @@ public strictfp class RobotPlayer {
     static MapLocation[] enemyArchonLocations;
     
     final static float DISTANCE_OFFSET = (float).00001;
+    final static float INTERACT_RADIUS = rc.getType().bodyRadius + GameConstants.INTERACTION_DIST_FROM_EDGE;
+    final static float SENSE_RADIUS = rc.getType().bodyRadius + rc.getType().sensorRadius;
 
     @SuppressWarnings("unused")
     public static void run(RobotController rc) throws GameActionException {
