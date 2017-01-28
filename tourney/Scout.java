@@ -2,7 +2,7 @@ package tourney;
 import battlecode.common.*;
 
 public class Scout extends RobotPlayer {
-	public static double[] goToEdge() {
+	/*public static double[] goToEdge() {
 		Direction way = randomDirection();
 		double[] count = new double[2];
 		count[0] = 0.0;
@@ -22,7 +22,7 @@ public class Scout extends RobotPlayer {
 			System.out.println("This will never happen");
 		}
 		return count;
-	}
+	}*/
 	
 	/*public static double[] skirtEdge() {
 		Direction way = randomDirection();
@@ -106,16 +106,17 @@ public class Scout extends RobotPlayer {
         return null;
 	}
 	
-	public static boolean init = true;
+	static boolean dying = false;
+	static boolean init = true;
 	//public static double range = 50.0;
-	public static Direction dir = Direction.EAST;
-	
+	static Direction dir = Direction.EAST;
+	static int ID = 0;
     public static void run(RobotController rc) {
     	
         RobotPlayer.rc = rc;
-
         System.out.println("Scout: Spawn");
         Team enemy = rc.getTeam().opponent();
+        Team ally  = rc.getTeam();
         
         while (true) {
 
@@ -124,18 +125,30 @@ public class Scout extends RobotPlayer {
             	if(init) {
             		minMapSize = skirtEdge();
             		init = false;
-            	}
-            	*/
-            	
+            	}*/
             	//should detect bullets and find where to move to instead; implement in dodge()
             	//double temp = range * 2;
             	dir = randomDirection();
             	//while(range > 0.0) {
-        		MapLocation attackable = findEnemy();
+        		//MapLocation attackable = findEnemy();
+        		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadius, enemy);
+        		RobotInfo[] friendlies = rc.senseNearbyRobots(rc.getType().sensorRadius, ally);
+        		TreeInfo[] teamTrees = rc.senseNearbyTrees(rc.getType().sensorRadius, ally);
         		//MapLocation shakeable = findTree();
         		//if(shakeable != null) {
         			//tryMove(rc.getLocation().directionTo(shakeable));
        			 	//rc.shake(shakeable);
+        		if(ID < 500 && !dying) {
+                    ID = Broadcast.requestID(ID);
+                }
+        		
+        		if (rc.getHealth() < rc.getType().maxHealth / 10 && !dying) {
+                    Broadcast.decrementRobotCount(RobotType.SCOUT); // Broadcast death on low health
+                    Broadcast.dying(ID);
+                    ID = -ID; // render ID unusable
+                    dying = true;
+                }
+        		
         		TreeInfo[] neutralTrees = rc.senseNearbyTrees(rc.getType().bodyRadius + rc.getType().strideRadius, Team.NEUTRAL);
                 for (int i=0; i < neutralTrees.length; i++) {
                     MapLocation loc = neutralTrees[i].getLocation();
@@ -143,15 +156,34 @@ public class Scout extends RobotPlayer {
                         rc.shake(loc); // Collect free bullets from neutral trees
                     }
                 }
-        		//}
-        		if(attackable != null) {
-        			if(rc.getHealth() < 5) {
-        				tryMove(rc.getLocation().directionTo(attackable).opposite());
-        			} else {
-        				tryMove(rc.getLocation().directionTo(attackable));
-        				rc.fireSingleShot(rc.getLocation().directionTo(attackable));
+                boolean shoot = true;
+                Direction toEnemy = rc.getLocation().directionTo(enemies[0].getLocation());
+                for(RobotInfo friendly : friendlies) {
+                    if(rc.getLocation().directionTo(friendly.getLocation()).degreesBetween(toEnemy) < 10) {
+                        shoot = false;
+                        break;
+                    }
+                }
+                for(TreeInfo teamTree : teamTrees) {
+                    if(rc.getLocation().directionTo(teamTree.getLocation()).degreesBetween(toEnemy) < 10) {
+                        shoot = false;
+                        break;
+                    }
+                }
+            	//for(int i = 0; i < enemies.length; i++) {
+            		if((enemies[0].getType() == RobotType.ARCHON 
+            				|| enemies[0].getType() == RobotType.GARDENER) 
+            				&& rc.senseNearbyBullets(rc.getType().bulletSightRadius).length < 5 ) {
+            			tryMove(rc.getLocation().directionTo(enemies[0].getLocation()));
+            		} 
+            		if(dying || rc.senseNearbyBullets(rc.getType().bulletSightRadius).length > 5) {
+        				tryMove(rc.getLocation().directionTo(enemies[0].getLocation()).opposite());
         			}
-        		}
+            		if(rc.canFireSingleShot() && !rc.hasAttacked() && shoot) {
+        				rc.fireSingleShot(rc.getLocation().directionTo(enemies[0].getLocation()));
+        			}
+            	//}
+                
         		if(!rc.onTheMap(rc.getLocation())) {
         			tryMove(dir.rotateLeftDegrees((float) 90.0));
         		} else {
