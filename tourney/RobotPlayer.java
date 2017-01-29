@@ -4,12 +4,13 @@ import battlecode.common.*;
 public strictfp class RobotPlayer {
 
     static RobotController rc;
-
-    static MapLocation[] enemyArchonLocations;
     
-    final static float DISTANCE_OFFSET = (float).00001;
-    final static float INTERACT_RADIUS = rc.getType().bodyRadius + GameConstants.INTERACTION_DIST_FROM_EDGE;
-    final static float SENSE_RADIUS = rc.getType().bodyRadius + rc.getType().sensorRadius;
+    final static float CALC_OFFSET = (float).001;
+    public static float INTERACT_RADIUS;
+    public static float SENSE_RADIUS;
+    public static float BULLET_RADIUS;
+    
+    static MapLocation[] enemyArchonLocations;
 
     @SuppressWarnings("unused")
     public static void run(RobotController rc) throws GameActionException {
@@ -17,8 +18,12 @@ public strictfp class RobotPlayer {
         Broadcast.initBroadcaster(rc);
         Direct.initDirector(rc);
 
+        INTERACT_RADIUS = rc.getType().bodyRadius + GameConstants.INTERACTION_DIST_FROM_EDGE;
+        SENSE_RADIUS = rc.getType().bodyRadius + rc.getType().sensorRadius;
+        BULLET_RADIUS = rc.getType().bodyRadius + rc.getType().bulletSightRadius;
+        
         enemyArchonLocations = rc.getInitialArchonLocations(rc.getTeam().opponent());
-
+        
         switch (rc.getType()) {
             case ARCHON:
                 Archon.run(rc);
@@ -76,7 +81,7 @@ public strictfp class RobotPlayer {
             rc.move(dir);
             return true;
         }
-
+        
         // Now try a bunch of similar angles
         int currentCheck = 1;
 
@@ -92,6 +97,41 @@ public strictfp class RobotPlayer {
                 return true;
             }
             // No move performed, try slightly further
+            currentCheck++;
+        }
+
+        return false;
+    }
+    
+    public static boolean tryMove(MapLocation ml, float degreeOffset, int checksPerSide) throws GameActionException {
+
+        if (rc.hasMoved())
+            return false;
+        
+		Direction dir = rc.getLocation().directionTo(ml);
+    	float dist = rc.getLocation().distanceTo(ml);
+    	
+    	boolean temp = false;
+        if (dist > rc.getType().strideRadius) 
+        	dist = rc.getType().strideRadius;
+        else
+        	temp = true;
+        if (rc.canMove(dir, dist)) { 
+            rc.move(dir, dist);
+            return temp;
+    	}
+        
+        int currentCheck = 1;
+
+        while (currentCheck <= checksPerSide) {
+            if(rc.canMove(dir.rotateLeftDegrees(degreeOffset*currentCheck))) {
+                rc.move(dir.rotateLeftDegrees(degreeOffset*currentCheck));
+                return false;
+            }
+            if(rc.canMove(dir.rotateRightDegrees(degreeOffset*currentCheck))) {
+                rc.move(dir.rotateRightDegrees(degreeOffset*currentCheck));
+                return false;
+            }
             currentCheck++;
         }
 
