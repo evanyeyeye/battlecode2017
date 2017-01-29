@@ -137,6 +137,20 @@ public strictfp class RobotPlayer {
 
         return false;
     }
+    
+    public static boolean tryDodge(BulletInfo bullet) throws GameActionException {
+    	if (!willCollideWithMe(bullet)) {
+    		return true;
+    	}
+    	Direction dirToBot = bullet.location.directionTo(rc.getLocation());
+    	if (tryMove(dirToBot.rotateLeftDegrees(90), 15, 2)) {
+    		return true;
+    	}
+    	if (tryMove(dirToBot.rotateRightDegrees(90), 15, 2)) {
+    		return true;
+    	}
+    	return tryMove(dirToBot.opposite(), 15, 2);
+    }
 
     /**
      * A slightly more complicated example function, this returns true if the given bullet is on a collision

@@ -100,13 +100,25 @@ public class Soldier extends RobotPlayer {
                         }
                     }
                 }
+                
+                BulletInfo[] bullets = rc.senseNearbyBullets(rc.getType().sensorRadius);
+                
+                if (bullets.length > 0) {
+                	tryDodge(bullets[bullets.length/2]);
+                }
 
                 // See if there are any nearby enemy robots
                 RobotInfo[] robots = rc.senseNearbyRobots(rc.getType().sensorRadius, enemy);
                 RobotInfo[] friendlies = rc.senseNearbyRobots(rc.getType().sensorRadius, ally);
-
+                
                 // If there are some...
                 if (robots.length > 0) {
+                	// run away from robots so we dont take 5 bullets to the face
+                	if (robots[0].location.distanceTo(myLocation) < 5) {
+                		// rotate slightly to the left to avoid any incoming fire
+                		tryMove(robots[0].location.directionTo(myLocation).rotateLeftDegrees(20));
+                	}
+                	
                     // And we have enough bullets, and haven't attacked yet this turn...
                     Broadcast.requestReinforcements(myLocation);
                     if(distanceToArchon < 25) {
@@ -147,7 +159,7 @@ public class Soldier extends RobotPlayer {
                                 break;
                             }
                             for(RobotInfo friendly : friendlies) {
-                                if(myLocation.directionTo(friendly.location).degreesBetween(towardsEn) < 50) {
+                                if(myLocation.directionTo(friendly.location).degreesBetween(towardsEn) < 40) {
                                     shoot = false;
                                     break;
                                 }
