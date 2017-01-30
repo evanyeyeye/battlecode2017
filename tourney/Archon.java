@@ -275,8 +275,10 @@ public class Archon extends RobotPlayer {
                                     num++;
                                 }
                             }
-                            Broadcast.requestReinforcements(new MapLocation(x_s, y_s));
-                            hasSentSoldiers = 1;
+                            if(num != 0) {
+                                Broadcast.requestReinforcements(new MapLocation(x_s/num, y_s/num));
+                                hasSentSoldiers = 1;
+                            }
                         }
                     }
                     rc.broadcast(0,Float.floatToRawIntBits(archonLocation.x));
