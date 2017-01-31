@@ -24,20 +24,20 @@ public class Soldier extends RobotPlayer {
     //
     static Direction directionMoving = null;
     static MapLocation myLocation = null;
-	static boolean moved = false;
+    static boolean moved = false;
     public static void tryMoveSoldier(MapLocation ml, int a, int b) throws GameActionException {
-		moved = true;
+        moved = true;
         tryMove(ml, a, b);
         if(myLocation != null)
             directionMoving = myLocation.directionTo(ml);
     }
     public static void tryMoveSoldier(Direction dir, int a, int b) throws GameActionException {
-		moved = true;
+        moved = true;
         tryMove(dir, a, b);
         directionMoving = dir;
     }
     public static void tryMoveSoldier(Direction dir) throws GameActionException {
-		moved = true;
+        moved = true;
         tryMove(dir);
         directionMoving = dir;
     }
@@ -50,11 +50,11 @@ public class Soldier extends RobotPlayer {
         Team enemy = rc.getTeam().opponent();
         Team ally  = rc.getTeam();
 
-		float request_x = 0;
-		float request_y = 0;
-		int request_age = 0;
+        float request_x = 0;
+        float request_y = 0;
+        int request_age = 0;
 
-		boolean responding = false;
+        boolean responding = false;
 
         while (true) {
 
@@ -74,7 +74,7 @@ public class Soldier extends RobotPlayer {
                 myLocation = rc.getLocation();
 
                 MapLocation archonLocation = new MapLocation(Float.intBitsToFloat(rc.readBroadcast(Broadcast.MAIN_ARCHON_POSITION[0])), 
-                		Float.intBitsToFloat(rc.readBroadcast(Broadcast.MAIN_ARCHON_POSITION[1])));
+                        Float.intBitsToFloat(rc.readBroadcast(Broadcast.MAIN_ARCHON_POSITION[1])));
                 float distanceToArchon = myLocation.distanceTo(archonLocation);
                 if(Broadcast.checkMainArchonDistress() || dying) {
                     if(distanceToArchon > 15) {
@@ -83,13 +83,13 @@ public class Soldier extends RobotPlayer {
                 }
 
                 TreeInfo[] neutralTrees = rc.senseNearbyTrees(INTERACT_RADIUS, Team.NEUTRAL);
-				int i = 0;
+                int i = 0;
                 for (; i<neutralTrees.length; i++) {
-                	Broadcast.requestLumberjack(neutralTrees[i]);
+                    Broadcast.requestLumberjack(neutralTrees[i]);
                     if (neutralTrees[i].getContainedBullets() > 0 && rc.canShake(neutralTrees[i].getLocation()))
                         rc.shake(neutralTrees[i].getLocation()); // Collect free bullets from neutral trees
                 }
-				boolean shoot_tree = i > 0;
+                boolean shoot_tree = i > 0;
 
                 // See if there are any nearby enemy robots
                 RobotInfo[] robots = rc.senseNearbyRobots(SENSE_RADIUS, enemy);
@@ -111,10 +111,10 @@ public class Soldier extends RobotPlayer {
                             case REINFORCE:
                                 if(Direct.retreat()) {
                                     tryMoveSoldier(archonLocation, 2, 45);
-								}
+                                }
                                 else {
                                     System.out.println("Responding to reinforcement request at: " + x_f +  " " + y_f);
-									responding = true;
+                                    responding = true;
                                     MapLocation requestedLocation = new MapLocation(x_f, y_f);
 
                                     if(myLocation.distanceTo(requestedLocation) < 4) {
@@ -130,42 +130,42 @@ public class Soldier extends RobotPlayer {
                                         request_y = y_f;
                                     }
                                     if(request_age < 30) {
-										boolean directionChanged = false;
-										for(RobotInfo friendly : friendlies) {
-											if(myLocation.directionTo(friendly.location).degreesBetween(myLocation.directionTo(requestedLocation)) < 50 && myLocation.distanceTo(friendly.location) < 4) {
-												if(Math.random() > .5) {
-													tryMoveSoldier(myLocation.directionTo(requestedLocation).rotateLeftDegrees(70));
-												} else {
-													tryMoveSoldier(myLocation.directionTo(requestedLocation).rotateRightDegrees(70));
-												}
-												directionChanged = true;
-												break;
-											}
-										}
-										if(!directionChanged)
-											tryMoveSoldier(requestedLocation, 2, 45);
+                                        boolean directionChanged = false;
+                                        for(RobotInfo friendly : friendlies) {
+                                            if(myLocation.directionTo(friendly.location).degreesBetween(myLocation.directionTo(requestedLocation)) < 50 && myLocation.distanceTo(friendly.location) < 4) {
+                                                if(Math.random() > .5) {
+                                                    tryMoveSoldier(myLocation.directionTo(requestedLocation).rotateLeftDegrees(70));
+                                                } else {
+                                                    tryMoveSoldier(myLocation.directionTo(requestedLocation).rotateRightDegrees(70));
+                                                }
+                                                directionChanged = true;
+                                                break;
+                                            }
+                                        }
+                                        if(!directionChanged)
+                                            tryMoveSoldier(requestedLocation, 2, 45);
                                     } else {
                                         rc.broadcast(ID, code*-1);
-										responding = false;
+                                        responding = false;
                                     }
                                 }
                                 break;
                         }
                     }
                 }
-                
+
                 BulletInfo[] bullets = rc.senseNearbyBullets(SENSE_RADIUS);
                 if (bullets.length > 0) 
-                	tryDodge(bullets[bullets.length/2]);
-                
+                    tryDodge(bullets[bullets.length/2]);
+
                 // If there are some...
                 if (robots.length > 0) {
-                	// run away from robots so we dont take 5 bullets to the face
-                	if (robots[0].location.distanceTo(myLocation) < 5) {
-                		// rotate slightly to the left to avoid any incoming fire
-                		tryMoveSoldier(robots[0].location.directionTo(myLocation).rotateLeftDegrees(20), 2, 45);
-                	}
-                	
+                    // run away from robots so we dont take 5 bullets to the face
+                    if (robots[0].location.distanceTo(myLocation) < 5) {
+                        // rotate slightly to the left to avoid any incoming fire
+                        tryMoveSoldier(robots[0].location.directionTo(myLocation).rotateLeftDegrees(20), 2, 45);
+                    }
+
                     // And we have enough bullets, and haven't attacked yet this turn...
                     Broadcast.requestReinforcements(myLocation);
                     if(distanceToArchon < 25) {
@@ -266,14 +266,14 @@ public class Soldier extends RobotPlayer {
                 }
                 if(shoot_tree && directionMoving != null && rc.canFireSingleShot()) {
                     if(myLocation.directionTo(neutralTrees[0].location).degreesBetween(directionMoving) < 25) {
-						if(myLocation.distanceTo(neutralTrees[0].location) < 3)
-							rc.fireSingleShot(directionMoving);
+                        if(myLocation.distanceTo(neutralTrees[0].location) < 3)
+                            rc.fireSingleShot(directionMoving);
                     }
                 }
 
-				if(!moved) {
-					tryMove(myLocation.directionTo(archonLocation));
-				}
+                if(!moved) {
+                    tryMove(myLocation.directionTo(archonLocation));
+                }
 
                 Clock.yield();
 

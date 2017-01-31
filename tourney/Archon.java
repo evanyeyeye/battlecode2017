@@ -163,16 +163,16 @@ public class Archon extends RobotPlayer {
                 Direction dir = randomDirection();
 
                 if (rc.canHireGardener(dir) 
-                		&& (Broadcast.getRobotCount(RobotType.GARDENER) < 3 
-                				|| Broadcast.getRobotCount(RobotType.GARDENER) < Broadcast.getRobotCount(RobotType.SOLDIER) / 2)
+                        && (Broadcast.getRobotCount(RobotType.GARDENER) < 3 
+                            || Broadcast.getRobotCount(RobotType.GARDENER) < Broadcast.getRobotCount(RobotType.SOLDIER) / 2)
                         && (rc.onTheMap(rc.getLocation().add(dir, rc.getType().bodyRadius + rc.getType().strideRadius + (float)2.0), rc.getType().bodyRadius)
-                        && (Broadcast.getRobotCount(RobotType.GARDENER) == 0 
-                        	|| !rc.isCircleOccupiedExceptByThisRobot(rc.getLocation().add(dir, rc.getType().bodyRadius + rc.getType().strideRadius + (float)2.0), rc.getType().bodyRadius)))) {
+                            && (Broadcast.getRobotCount(RobotType.GARDENER) == 0 
+                                || !rc.isCircleOccupiedExceptByThisRobot(rc.getLocation().add(dir, rc.getType().bodyRadius + rc.getType().strideRadius + (float)2.0), rc.getType().bodyRadius)))) {
 
                     rc.hireGardener(dir); // temporary check (TODO: DOESNT WORK ON TIGHT MAPS) until gardeners become legit
                     Broadcast.incrementRobotCount(RobotType.GARDENER);
 
-                }
+                                }
 
                 if(cycle_num < 8) {
                     switch(cycle_num) {
@@ -198,7 +198,7 @@ public class Archon extends RobotPlayer {
                             break;
                     }
                 }
-                
+
                 cycle_num++;
                 if(cycle_num > 10 && rc.readBroadcast(Broadcast.GARDENER_COUNT_INDEX) == 0) {
                     main_archon = false;
@@ -207,11 +207,11 @@ public class Archon extends RobotPlayer {
 
                 TreeInfo[] neutralTrees = rc.senseNearbyTrees(INTERACT_RADIUS, Team.NEUTRAL);
                 for (int i=0; i<neutralTrees.length; i++) {
-                	Broadcast.requestLumberjack(neutralTrees[i]);
+                    Broadcast.requestLumberjack(neutralTrees[i]);
                     if (neutralTrees[i].getContainedBullets() > 0 && rc.canShake(neutralTrees[i].getLocation()))
                         rc.shake(neutralTrees[i].getLocation()); // Collect free bullets from neutral trees
                 }
-                
+
                 MapLocation archonLocation = rc.getLocation();
 
                 float x = 0.0f;
@@ -257,18 +257,18 @@ public class Archon extends RobotPlayer {
                         closestDistance = enemyDistance;
                     }
                 }
-                
+
                 if(closestEnemy != null) {
                     System.out.println("Archon moving away from: " + closestEnemy.x + " " + closestEnemy.y);
                     tryMove(closestEnemy.directionTo(archonLocation));
                 };
-                
+
                 RobotInfo[] allyRobots = rc.senseNearbyRobots(INTERACT_RADIUS + CALC_OFFSET, rc.getTeam()); // Gardener interference
                 for (int i=0; i<allyRobots.length; i++)
-                	if (allyRobots[i].getType() == RobotType.GARDENER)
-                		if (tryMove(rc.getLocation().directionTo(allyRobots[i].getLocation()).opposite(), 2, 45))
-                			break;
-                
+                    if (allyRobots[i].getType() == RobotType.GARDENER)
+                        if (tryMove(rc.getLocation().directionTo(allyRobots[i].getLocation()).opposite(), 2, 45))
+                            break;
+
 
                 // Low priority tasks
                 //
