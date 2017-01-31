@@ -27,9 +27,11 @@ public class Tank extends RobotPlayer {
                     ID = Broadcast.requestID(ID);
 
                 TreeInfo[] neutralTrees = rc.senseNearbyTrees(INTERACT_RADIUS, Team.NEUTRAL);
-                for (int i=0; i<neutralTrees.length; i++)
+                for (int i=0; i<neutralTrees.length; i++) {
+                	Broadcast.requestLumberjack(neutralTrees[i]);
                     if (neutralTrees[i].getContainedBullets() > 0 && rc.canShake(neutralTrees[i].getLocation()))
                         rc.shake(neutralTrees[i].getLocation()); // Collect free bullets from neutral trees
+                }
                 
                 MapLocation myLocation = rc.getLocation();
                 MapLocation archonLocation = new MapLocation(

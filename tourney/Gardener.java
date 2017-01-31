@@ -302,9 +302,9 @@ public class Gardener extends RobotPlayer {
                 	chooseBuild(); // build based on surroundings
                 	
                 	foundHome = findHome() 
-                			|| rc.senseNearbyRobots(SENSE_RADIUS, rc.getTeam().opponent()).length > 0 
-                			|| (rc.readBroadcast(Broadcast.FOUND_HOME_COUNT_INDEX) < 3 
-                					&& rc.readBroadcast(Broadcast.FOUND_HOME_COUNT_INDEX) < rc.getRoundNum() / (rc.getRoundLimit() / 30));
+                			|| rc.senseNearbyRobots(SENSE_RADIUS, rc.getTeam().opponent()).length > 0; 
+                			/*|| (rc.readBroadcast(Broadcast.FOUND_HOME_COUNT_INDEX) < 3 
+                					&& rc.readBroadcast(Broadcast.FOUND_HOME_COUNT_INDEX) < rc.getRoundNum() / (rc.getRoundLimit() / 30));*/
                     
                     if (!foundHome) { // If testHome() is true than process below code without waiting for another loop.
                         Clock.yield();
