@@ -282,7 +282,7 @@ public class Archon extends RobotPlayer {
                         hasSentSoldiers = 0;
                     }
                     if(hasSentSoldiers == 0) {
-                        if(rc.readBroadcast(Broadcast.SOLDIER_COUNT_INDEX) > 10) {
+                        if(rc.readBroadcast(Broadcast.SOLDIER_COUNT_INDEX) > 8) {
                             float x_s = 0.0f;
                             float y_s = 0.0f;
                             int num = 0;

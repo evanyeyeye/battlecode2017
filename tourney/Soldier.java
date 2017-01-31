@@ -24,16 +24,20 @@ public class Soldier extends RobotPlayer {
     //
     static Direction directionMoving = null;
     static MapLocation myLocation = null;
+	static boolean moved = false;
     public static void tryMoveSoldier(MapLocation ml, int a, int b) throws GameActionException {
+		moved = true;
         tryMove(ml, a, b);
         if(myLocation != null)
             directionMoving = myLocation.directionTo(ml);
     }
     public static void tryMoveSoldier(Direction dir, int a, int b) throws GameActionException {
+		moved = true;
         tryMove(dir, a, b);
         directionMoving = dir;
     }
     public static void tryMoveSoldier(Direction dir) throws GameActionException {
+		moved = true;
         tryMove(dir);
         directionMoving = dir;
     }
@@ -45,6 +49,12 @@ public class Soldier extends RobotPlayer {
 
         Team enemy = rc.getTeam().opponent();
         Team ally  = rc.getTeam();
+
+		float request_x = 0;
+		float request_y = 0;
+		int request_age = 0;
+
+		boolean responding = false;
 
         while (true) {
 
@@ -80,7 +90,11 @@ public class Soldier extends RobotPlayer {
                         rc.shake(neutralTrees[i].getLocation()); // Collect free bullets from neutral trees
                 }
 				boolean shoot_tree = i > 0;
-                
+
+                // See if there are any nearby enemy robots
+                RobotInfo[] robots = rc.senseNearbyRobots(SENSE_RADIUS, enemy);
+                RobotInfo[] friendlies = rc.senseNearbyRobots(SENSE_RADIUS, ally);
+
                 if(ID > 500) {
 
                     int code = rc.readBroadcast(ID);
@@ -95,10 +109,12 @@ public class Soldier extends RobotPlayer {
                         int type = coordinates[2];
                         switch (type) {
                             case REINFORCE:
-                                if(Direct.retreat())
+                                if(Direct.retreat()) {
                                     tryMoveSoldier(archonLocation, 2, 45);
+								}
                                 else {
                                     System.out.println("Responding to reinforcement request at: " + x_f +  " " + y_f);
+									responding = true;
                                     MapLocation requestedLocation = new MapLocation(x_f, y_f);
 
                                     if(myLocation.distanceTo(requestedLocation) < 4) {
@@ -106,7 +122,32 @@ public class Soldier extends RobotPlayer {
                                         break;
                                     }
 
-                                    tryMoveSoldier(requestedLocation, 2, 45);
+                                    if(Math.abs(request_x - x_f) < 0.005 && Math.abs(request_y - y_f) < 0.005) {
+                                        request_age++;
+                                    } else {
+                                        request_age = 0;
+                                        request_x = x_f;
+                                        request_y = y_f;
+                                    }
+                                    if(request_age < 30) {
+										boolean directionChanged = false;
+										for(RobotInfo friendly : friendlies) {
+											if(myLocation.directionTo(friendly.location).degreesBetween(myLocation.directionTo(requestedLocation)) < 50 && myLocation.distanceTo(friendly.location) < 4) {
+												if(Math.random() > .5) {
+													tryMoveSoldier(myLocation.directionTo(requestedLocation).rotateLeftDegrees(70));
+												} else {
+													tryMoveSoldier(myLocation.directionTo(requestedLocation).rotateRightDegrees(70));
+												}
+												directionChanged = true;
+												break;
+											}
+										}
+										if(!directionChanged)
+											tryMoveSoldier(requestedLocation, 2, 45);
+                                    } else {
+                                        rc.broadcast(ID, code*-1);
+										responding = false;
+                                    }
                                 }
                                 break;
                         }
@@ -116,10 +157,6 @@ public class Soldier extends RobotPlayer {
                 BulletInfo[] bullets = rc.senseNearbyBullets(SENSE_RADIUS);
                 if (bullets.length > 0) 
                 	tryDodge(bullets[bullets.length/2]);
-
-                // See if there are any nearby enemy robots
-                RobotInfo[] robots = rc.senseNearbyRobots(SENSE_RADIUS, enemy);
-                RobotInfo[] friendlies = rc.senseNearbyRobots(SENSE_RADIUS, ally);
                 
                 // If there are some...
                 if (robots.length > 0) {
@@ -229,9 +266,14 @@ public class Soldier extends RobotPlayer {
                 }
                 if(shoot_tree && directionMoving != null && rc.canFireSingleShot()) {
                     if(myLocation.directionTo(neutralTrees[0].location).degreesBetween(directionMoving) < 25) {
-                        rc.fireSingleShot(directionMoving);
+						if(myLocation.distanceTo(neutralTrees[0].location) < 3)
+							rc.fireSingleShot(directionMoving);
                     }
                 }
+
+				if(!moved) {
+					tryMove(myLocation.directionTo(archonLocation));
+				}
 
                 Clock.yield();
 
