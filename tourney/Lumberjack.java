@@ -119,7 +119,12 @@ public class Lumberjack extends RobotPlayer {
                 		isChopping = false;               	
 
                 if (!isChopping && !rc.hasMoved()) // no enemies, so move to nearest Tree
-                    findTree(rc.senseNearbyTrees());
+                    if (!findTree(rc.senseNearbyTrees())) {
+                    	if (searchLocation == null) 
+                    		searchLocation = enemyArchonLocations[0];
+                    	if (tryMove(enemyArchonLocations[0], 2, 45))
+                    		searchLocation = null;
+                    }
                 	
                 if (!rc.hasAttacked()) { // first try attacking enemy trees
                     TreeInfo[] enemyTrees = rc.senseNearbyTrees(GameConstants.LUMBERJACK_STRIKE_RADIUS, rc.getTeam().opponent());

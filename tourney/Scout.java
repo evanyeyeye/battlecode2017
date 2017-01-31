@@ -46,8 +46,7 @@ public class Scout extends RobotPlayer {
                     MapLocation loc = neutralTrees[i].getLocation();
                     if (neutralTrees[i].getContainedBullets() > 0 && rc.canShake(neutralTrees[i].getLocation())) {
                         rc.shake(loc); // Collect free bullets from neutral trees
-                        targetDirection = (rc.getLocation().directionTo(loc));
-                        Broadcast.requestLumberjack(neutralTrees[i]);
+                        targetDirection = (rc.getLocation().directionTo(loc));                        Broadcast.requestLumberjack(neutralTrees[i]);
                     }
                 }
                 
@@ -73,7 +72,7 @@ public class Scout extends RobotPlayer {
             	//}
                 
         		//if(!rc.hasMoved()) {
-    			while(!rc.onTheMap(rc.getLocation().add(targetDirection, rc.getType().strideRadius))) {
+    			while (!rc.onTheMap(rc.getLocation().add(targetDirection, rc.getType().strideRadius))) {
         			targetDirection = targetDirection.rotateLeftDegrees((float) 45.0);
         		}
         			

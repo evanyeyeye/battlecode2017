@@ -168,10 +168,9 @@ public class Soldier extends RobotPlayer {
 
                     // And we have enough bullets, and haven't attacked yet this turn...
                     Broadcast.requestReinforcements(myLocation);
-                    if(distanceToArchon < 25) {
+                    if (distanceToArchon < 25) 
                         Broadcast.alertArchon(myLocation);
-                    }
-                    if (Direct.retreat() && rc.canFirePentadShot()) {
+                    if (Direct.retreat() || (robots.length > 3 && rc.canFirePentadShot())) {
                         boolean shoot = true;
                         Direction towardsEn = null;
                         for(RobotInfo en : robots) {
