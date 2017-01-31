@@ -23,7 +23,10 @@ public class Broadcast {
     public static int SOLDIER_COUNT_INDEX       = 8;
     public static int LUMBERJACK_COUNT_INDEX    = 9;
     public static int SCOUT_COUNT_INDEX         = 10;
+    public static int TANK_COUNT_INDEX          = 11;
 
+    public static int FOUND_HOME_COUNT_INDEX    = 20;
+    
     public static int REINFORCEMENTS_REQUESTS[] = {200, 203, 206, 209};
 
     // Each robot takes 3 indices: [age, x, y]
@@ -254,6 +257,9 @@ public class Broadcast {
             case SCOUT:
                 index = SCOUT_COUNT_INDEX;
                 break;
+            case TANK:
+            	index = TANK_COUNT_INDEX;
+            	break;
         }
 
         rc.broadcast(index, rc.readBroadcast(index) - 1);
@@ -280,6 +286,9 @@ public class Broadcast {
             case SCOUT:
                 index = SCOUT_COUNT_INDEX;
                 break;
+            case TANK:
+            	index = TANK_COUNT_INDEX;
+            	break;
         }
 
         return rc.readBroadcast(index);

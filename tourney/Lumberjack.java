@@ -10,6 +10,8 @@ public class Lumberjack extends RobotPlayer {
     public static boolean isChopping = false;
     public static TreeInfo targetTree = null;
 
+    public static MapLocation searchLocation = null;
+    
     static void checkForRequests() throws GameActionException {
     	
         MapLocation closestLocation = null;
@@ -61,16 +63,7 @@ public class Lumberjack extends RobotPlayer {
     	for (int i=0; i<trees.length; i++) {
             if (trees[i].getTeam() == rc.getTeam())
                 continue;
-    		Direction dirToTree = rc.getLocation().directionTo(trees[i].getLocation());
-    		float distToTree = rc.getLocation().distanceTo(trees[i].getLocation()) - trees[i].getRadius() - rc.getType().bodyRadius - CALC_OFFSET;
-        	
-    		// System.out.println(trees[i].getID() + ": " + distToTree);
-    		
-            if (distToTree > rc.getType().strideRadius)
-            	distToTree = rc.getType().strideRadius;
-            if (rc.canMove(dirToTree, distToTree)) { // TODO: pathfinding :)
-                rc.move(dirToTree, distToTree);
-                // System.out.println("the one");
+            if (tryMove(trees[i].getLocation(), 2f, 45)) {
                 isChopping = false;
                 return true;
             }
@@ -99,12 +92,12 @@ public class Lumberjack extends RobotPlayer {
                     if (neutralTrees[i].getContainedBullets() > 0 && rc.canShake(neutralTrees[i].getLocation()))
                         rc.shake(neutralTrees[i].getLocation()); // Collect free bullets from neutral trees
 
-                RobotInfo[] enemyRobots = rc.senseNearbyRobots(rc.getType().bodyRadius + GameConstants.LUMBERJACK_STRIKE_RADIUS, rc.getTeam().opponent());
+                RobotInfo[] enemyRobots = rc.senseNearbyRobots(GameConstants.LUMBERJACK_STRIKE_RADIUS, rc.getTeam().opponent());
                 if (!rc.hasAttacked()) {
-                    if (enemyRobots.length > rc.senseNearbyRobots(GameConstants.LUMBERJACK_STRIKE_RADIUS, rc.getTeam()).length + rc.senseNearbyTrees(GameConstants.LUMBERJACK_STRIKE_RADIUS, rc.getTeam()).length)
+                    if (enemyRobots.length >= rc.senseNearbyRobots(GameConstants.LUMBERJACK_STRIKE_RADIUS, rc.getTeam()).length + rc.senseNearbyTrees(GameConstants.LUMBERJACK_STRIKE_RADIUS, rc.getTeam()).length)
                         rc.strike(); // attack enemies if close enough and worth it
                 } else if (rc.senseNearbyBullets().length > 0) { // if there is nearby combat
-                    enemyRobots = rc.senseNearbyRobots(rc.getType().bodyRadius + rc.getType().sensorRadius, rc.getTeam().opponent());
+                    enemyRobots = rc.senseNearbyRobots(SENSE_RADIUS, rc.getTeam().opponent());
                     if (!rc.hasMoved()) {
                         for (int i=0; i<enemyRobots.length; i++) {
                             Direction dirToEnemy = rc.getLocation().directionTo(enemyRobots[i].getLocation());
@@ -127,7 +120,7 @@ public class Lumberjack extends RobotPlayer {
 
                 if (!isChopping && !rc.hasMoved()) // no enemies, so move to nearest Tree
                     findTree(rc.senseNearbyTrees());
-
+                	
                 if (!rc.hasAttacked()) { // first try attacking enemy trees
                     TreeInfo[] enemyTrees = rc.senseNearbyTrees(GameConstants.LUMBERJACK_STRIKE_RADIUS, rc.getTeam().opponent());
                     for (int i=0; i<enemyTrees.length; i++) {

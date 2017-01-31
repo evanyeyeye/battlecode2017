@@ -47,12 +47,59 @@ public strictfp class RobotPlayer {
     }
 
     /*
+     * Better move method
+     * @return true only if location is reached
+     */
+    public static boolean tryMove(MapLocation ml, float degreeOffset, int checksPerSide) throws GameActionException {
+
+        if (rc.hasMoved())
+            return false;
+        
+		Direction dir = rc.getLocation().directionTo(ml);
+    	float dist = rc.getLocation().distanceTo(ml);
+    	
+    	boolean reached = false;
+        if (dist > rc.getType().strideRadius) 
+        	dist = rc.getType().strideRadius;
+        else
+        	reached = true;
+        
+        if (rc.canMove(dir, dist)) { 
+            rc.move(dir, dist);
+            return reached;
+    	}
+        
+        int currentCheck = 1;
+
+        while (currentCheck <= checksPerSide) {
+            if(rc.canMove(dir.rotateLeftDegrees(degreeOffset*currentCheck))) {
+                rc.move(dir.rotateLeftDegrees(degreeOffset*currentCheck));
+                return false;
+            }
+            if(rc.canMove(dir.rotateRightDegrees(degreeOffset*currentCheck))) {
+                rc.move(dir.rotateRightDegrees(degreeOffset*currentCheck));
+                return false;
+            }
+            currentCheck++;
+        }
+
+        return false;
+    }
+    
+    
+    
+    
+    
+    
+    
+    /*
      * @return a random Direction
      */
     public static Direction randomDirection() {
         return new Direction((float)Math.random() * 2 * (float)Math.PI);
     }
 
+    
     /**
      * Attempts to move in a given direction, while avoiding small obstacles directly in the path.
      *
@@ -101,6 +148,20 @@ public strictfp class RobotPlayer {
         }
 
         return false;
+    }
+    
+    public static boolean tryDodge(BulletInfo bullet) throws GameActionException {
+    	if (!willCollideWithMe(bullet)) {
+    		return true;
+    	}
+    	Direction dirToBot = bullet.location.directionTo(rc.getLocation());
+    	if (tryMove(dirToBot.rotateLeftDegrees(90), 15, 2)) {
+    		return true;
+    	}
+    	if (tryMove(dirToBot.rotateRightDegrees(90), 15, 2)) {
+    		return true;
+    	}
+    	return tryMove(dirToBot.opposite(), 15, 2);
     }
 
     /**

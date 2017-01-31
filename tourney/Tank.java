@@ -26,6 +26,11 @@ public class Tank extends RobotPlayer {
                 if(ID < 500 && !dying)
                     ID = Broadcast.requestID(ID);
 
+                TreeInfo[] neutralTrees = rc.senseNearbyTrees(INTERACT_RADIUS, Team.NEUTRAL);
+                for (int i=0; i<neutralTrees.length; i++)
+                    if (neutralTrees[i].getContainedBullets() > 0 && rc.canShake(neutralTrees[i].getLocation()))
+                        rc.shake(neutralTrees[i].getLocation()); // Collect free bullets from neutral trees
+                
                 MapLocation myLocation = rc.getLocation();
                 MapLocation archonLocation = new MapLocation(
                         (rc.readBroadcast(Broadcast.MAIN_ARCHON_POSITION[0])), Float.intBitsToFloat(rc.readBroadcast(Broadcast.MAIN_ARCHON_POSITION[1])));
@@ -44,7 +49,7 @@ public class Tank extends RobotPlayer {
                         switch (type) {
                             case 1: // (REINFORCE), don't want to waste bullets with tank, might as well have it act as a tank then
                                 if (Direct.retreat())
-                                    tryMove(myLocation.directionTo(archonLocation));
+                                    tryMove(archonLocation, 2, 45);
                                 else {
                                     System.out.println("Responding to reinforcement request at: " + x +  " " + y);
                                     MapLocation requestedLocation = new MapLocation(x, y);
@@ -54,102 +59,47 @@ public class Tank extends RobotPlayer {
                                         break;
                                     }
 
-                                    tryMove(myLocation.directionTo(requestedLocation));
+                                    tryMove(requestedLocation, 2, 45);
                                 }
                                 break;
                         }
                     }
                 }
 
-                Team enemy = rc.getTeam().opponent();
-                Team ally  = rc.getTeam();
-
                 // See if there are any nearby enemy robots
-                RobotInfo[] robots = rc.senseNearbyRobots(rc.getType().sensorRadius, enemy);
-                RobotInfo[] friendlies = rc.senseNearbyRobots(rc.getType().sensorRadius, ally);
+                RobotInfo[] enemyRobots = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam().opponent());
+                RobotInfo[] allyRobots = rc.senseNearbyRobots(rc.getType().sensorRadius, rc.getTeam());
 
                 // If there are some...
-                if (robots.length > 0) {
+                if (enemyRobots.length > 0) {
                     // And we have enough bullets, and haven't attacked yet this turn...
                     Broadcast.requestReinforcements(myLocation);
-                    if(distanceToArchon < 25) {
+                    if (distanceToArchon < 25f) {
                         Broadcast.alertArchon(myLocation);
                     }
-                    if (Direct.retreat() && rc.canFirePentadShot()) {
+                    if (rc.canFirePentadShot()) {
                         boolean shoot = true;
                         Direction towardsEn = null;
-                        for(RobotInfo en : robots) {
+                        for (RobotInfo en : enemyRobots) {
                             towardsEn = myLocation.directionTo(en.location);
-                            if(myLocation.distanceTo(en.location) < 4) {
+                            if (myLocation.distanceTo(en.location) < 4) {
                                 rc.firePentadShot(towardsEn);
                                 break;
                             }
-                            for(RobotInfo friendly : friendlies) {
+                            for (RobotInfo friendly : allyRobots) {
                                 if(myLocation.directionTo(friendly.location).degreesBetween(towardsEn) < 50) {
                                     shoot = false;
                                     break;
                                 }
                             }
-                            if(shoot && towardsEn != null) {
+                            if (shoot && towardsEn != null) {
                                 rc.firePentadShot(towardsEn);
-                                tryMove(towardsEn.opposite());
+                                tryMove(towardsEn.opposite(), 2, 45);
                                 break;
                             }
                         }
                         if(!shoot && towardsEn != null) {
-                            tryMove(towardsEn);
-                        }
-                    }
-                    else if (friendlies.length > robots.length * 2 && rc.canFireSingleShot()) {
-                        boolean shoot = true;
-                        Direction towardsEn = null;
-                        for(RobotInfo en : robots) {
-                            towardsEn = myLocation.directionTo(en.location);
-                            if(myLocation.distanceTo(en.location) < 4) {
-                                rc.fireSingleShot(towardsEn);
-                                break;
-                            }
-                            for(RobotInfo friendly : friendlies) {
-                                if(myLocation.directionTo(friendly.location).degreesBetween(towardsEn) < 50) {
-                                    shoot = false;
-                                    break;
-                                }
-                            }
-                            if(shoot && towardsEn != null) {
-                                rc.fireSingleShot(towardsEn);
-
-                                tryMove(towardsEn.opposite());
-                                break;
-                            }
-                        }
-                        if(!shoot && towardsEn != null) {
-                            tryMove(towardsEn);
-                        }
-                    }
-                    else if (rc.canFireTriadShot()) {
-                        // ...Then fire a bullet in the direction of the enemy.
-                        boolean shoot = true;
-                        Direction towardsEn = null;
-                        for(RobotInfo en : robots) {
-                            towardsEn = myLocation.directionTo(en.location);
-                            if(myLocation.distanceTo(en.location) < 4) {
-                                rc.fireTriadShot(towardsEn);
-                                break;
-                            }
-                            for(RobotInfo friendly : friendlies) {
-                                if(myLocation.directionTo(friendly.location).degreesBetween(towardsEn) < 50) {
-                                    shoot = false;
-                                    break;
-                                }
-                            }
-                            if(shoot && towardsEn != null) {
-                                rc.fireTriadShot(towardsEn);
-                                tryMove(towardsEn.opposite());
-                                break;
-                            }
-                        }
-                        if(!shoot && towardsEn != null) {
-                            tryMove(towardsEn);
+                            tryMove(towardsEn, 2, 45);
                         }
                     }
                 }
