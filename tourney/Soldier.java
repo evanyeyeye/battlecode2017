@@ -21,6 +21,22 @@ public class Soldier extends RobotPlayer {
     // 0 == Need ID
     // [490,499] == ID request processing
     // [500,999] == ID established
+    //
+    static Direction directionMoving = null;
+    static MapLocation myLocation = null;
+    public static void tryMoveSoldier(MapLocation ml, int a, int b) throws GameActionException {
+        tryMove(ml, a, b);
+        if(myLocation != null)
+            directionMoving = myLocation.directionTo(ml);
+    }
+    public static void tryMoveSoldier(Direction dir, int a, int b) throws GameActionException {
+        tryMove(dir, a, b);
+        directionMoving = dir;
+    }
+    public static void tryMoveSoldier(Direction dir) throws GameActionException {
+        tryMove(dir);
+        directionMoving = dir;
+    }
 
     public static void run(RobotController rc) throws GameActionException {
 
@@ -45,23 +61,25 @@ public class Soldier extends RobotPlayer {
                     ID = Broadcast.requestID(ID);
                 }
 
-                MapLocation myLocation = rc.getLocation();
+                myLocation = rc.getLocation();
 
                 MapLocation archonLocation = new MapLocation(Float.intBitsToFloat(rc.readBroadcast(Broadcast.MAIN_ARCHON_POSITION[0])), 
                 		Float.intBitsToFloat(rc.readBroadcast(Broadcast.MAIN_ARCHON_POSITION[1])));
                 float distanceToArchon = myLocation.distanceTo(archonLocation);
                 if(Broadcast.checkMainArchonDistress() || dying) {
                     if(distanceToArchon > 15) {
-                        tryMove(archonLocation, 2, 45);
+                        tryMoveSoldier(archonLocation, 2, 45);
                     }
                 }
 
                 TreeInfo[] neutralTrees = rc.senseNearbyTrees(INTERACT_RADIUS, Team.NEUTRAL);
-                for (int i=0; i<neutralTrees.length; i++) {
+				int i = 0;
+                for (; i<neutralTrees.length; i++) {
                 	Broadcast.requestLumberjack(neutralTrees[i]);
                     if (neutralTrees[i].getContainedBullets() > 0 && rc.canShake(neutralTrees[i].getLocation()))
                         rc.shake(neutralTrees[i].getLocation()); // Collect free bullets from neutral trees
                 }
+				boolean shoot_tree = i > 0;
                 
                 if(ID > 500) {
 
@@ -78,7 +96,7 @@ public class Soldier extends RobotPlayer {
                         switch (type) {
                             case REINFORCE:
                                 if(Direct.retreat())
-                                    tryMove(archonLocation, 2, 45);
+                                    tryMoveSoldier(archonLocation, 2, 45);
                                 else {
                                     System.out.println("Responding to reinforcement request at: " + x_f +  " " + y_f);
                                     MapLocation requestedLocation = new MapLocation(x_f, y_f);
@@ -88,7 +106,7 @@ public class Soldier extends RobotPlayer {
                                         break;
                                     }
 
-                                    tryMove(requestedLocation, 2, 45);
+                                    tryMoveSoldier(requestedLocation, 2, 45);
                                 }
                                 break;
                         }
@@ -108,7 +126,7 @@ public class Soldier extends RobotPlayer {
                 	// run away from robots so we dont take 5 bullets to the face
                 	if (robots[0].location.distanceTo(myLocation) < 5) {
                 		// rotate slightly to the left to avoid any incoming fire
-                		tryMove(robots[0].location.directionTo(myLocation).rotateLeftDegrees(20), 2, 45);
+                		tryMoveSoldier(robots[0].location.directionTo(myLocation).rotateLeftDegrees(20), 2, 45);
                 	}
                 	
                     // And we have enough bullets, and haven't attacked yet this turn...
@@ -133,12 +151,12 @@ public class Soldier extends RobotPlayer {
                             }
                             if(shoot && towardsEn != null) {
                                 rc.firePentadShot(towardsEn);
-                                tryMove(towardsEn.opposite(), 2, 45);
+                                tryMoveSoldier(towardsEn.opposite(), 2, 45);
                                 break;
                             }
                         }
                         if(!shoot && towardsEn != null) {
-                            tryMove(towardsEn, 2, 45);
+                            tryMoveSoldier(towardsEn, 2, 45);
                         }
                     }
                     else if (friendlies.length > robots.length * 2 && rc.canFireSingleShot()) {
@@ -158,12 +176,12 @@ public class Soldier extends RobotPlayer {
                             }
                             if(shoot && towardsEn != null) {
                                 rc.fireSingleShot(towardsEn);
-                                tryMove(towardsEn.opposite(), 2, 45);
+                                tryMoveSoldier(towardsEn.opposite(), 2, 45);
                                 break;
                             }
                         }
                         if(!shoot && towardsEn != null) {
-                            tryMove(towardsEn, 2, 45);
+                            tryMoveSoldier(towardsEn, 2, 45);
                         }
                     }
                     else if (rc.canFireTriadShot()) {
@@ -184,29 +202,34 @@ public class Soldier extends RobotPlayer {
                             }
                             if(shoot && towardsEn != null) {
                                 rc.fireTriadShot(towardsEn);
-                                tryMove(towardsEn.opposite());
+                                tryMoveSoldier(towardsEn.opposite());
                                 break;
                             }
                         }
                         if(!shoot && towardsEn != null) {
-                            tryMove(towardsEn);
+                            tryMoveSoldier(towardsEn);
                         }
                     }
                 }
 
                 if(Direct.retreat())
-                    tryMove(myLocation.directionTo(archonLocation));
+                    tryMoveSoldier(myLocation.directionTo(archonLocation));
                 else {
                     if(!Broadcast.anyReinforcementsRequests()) {
                         if(distanceToArchon < 30) {
                             int len = RobotPlayer.enemyArchonLocations.length;
                             if(len > 0) {
                                 int index = (int)(Math.random() * len);
-                                tryMove(myLocation.directionTo(RobotPlayer.enemyArchonLocations[index]));
+                                tryMoveSoldier(myLocation.directionTo(RobotPlayer.enemyArchonLocations[index]));
                             }
                         } else {
-                            tryMove(myLocation.directionTo(archonLocation));
+                            tryMoveSoldier(myLocation.directionTo(archonLocation));
                         }
+                    }
+                }
+                if(shoot_tree && directionMoving != null && rc.canFireSingleShot()) {
+                    if(myLocation.directionTo(neutralTrees[0].location).degreesBetween(directionMoving) < 25) {
+                        rc.fireSingleShot(directionMoving);
                     }
                 }
 
