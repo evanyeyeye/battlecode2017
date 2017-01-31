@@ -108,9 +108,10 @@ public class Scout extends RobotPlayer {
 	
 	static boolean dying = false;
 	static boolean init = true;
-	static boolean flee = true;
+	static boolean flee = false;
 	//public static double range = 50.0;
-	static Direction dir = Direction.WEST;
+	static Direction dir = Direction.EAST;
+	//static Direction last; //Last direction moved
 	static MapLocation start;
 	static int ID = 0;
     public static void run(RobotController rc) {
@@ -120,7 +121,7 @@ public class Scout extends RobotPlayer {
         Team enemy = rc.getTeam().opponent();
         Team ally  = rc.getTeam();
         RobotInfo[] enemies;
-        
+        dir = randomDirection();
         while (true) {
 
             try {
@@ -165,18 +166,14 @@ public class Scout extends RobotPlayer {
                 //System.out.println("SCOUT: " + Clock.getBytecodesLeft());
             	//for(int i = 0; i < enemies.length; i++) {
                 if(enemies.length > 0) {
-	            	if((enemies[0].getType() == RobotType.ARCHON 
+	            	/*if((enemies[0].getType() == RobotType.ARCHON 
 	            				|| enemies[0].getType() == RobotType.GARDENER) 
 	            				&& rc.senseNearbyBullets(rc.getType().bulletSightRadius).length < 5 ) {
 	            			dir = (rc.getLocation().directionTo(enemies[0].getLocation()));
-	        		} 
+	        		} */
 	        		if(dying || rc.senseNearbyBullets(rc.getType().bulletSightRadius).length > 5) {
-	    				if(flee) {
-	    					tryMove(rc.getLocation().directionTo(enemies[0].getLocation()).opposite());
-	    					
-	    				} else {
-	    					dir = (rc.getLocation().directionTo(enemies[0].getLocation()).opposite());
-	    				}
+	    				flee = true;
+    					tryMove(rc.getLocation().directionTo(enemies[0].getLocation()).opposite());
 	    			}
 	        		
             		if(rc.canFireSingleShot() && !rc.hasAttacked() && rc.getLocation().distanceTo(enemies[0].getLocation()) < 4) {
@@ -193,9 +190,9 @@ public class Scout extends RobotPlayer {
         			dir = dir.rotateLeftDegrees((float) 90.0);
         		}
         			
-    			if(enemies.length > 0 && dir.degreesBetween(rc.getLocation().directionTo(enemies[0].getLocation())) < 10) {
+    			/*if(enemies.length > 0 && dir.degreesBetween(rc.getLocation().directionTo(enemies[0].getLocation())) < 10) {
     				dir = rc.getLocation().directionTo(enemies[0].getLocation()).opposite();
-    			}
+    			}*/
         		if(!rc.hasMoved()) {
         			tryMove(dir);
         		}
