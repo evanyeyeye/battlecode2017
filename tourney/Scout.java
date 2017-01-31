@@ -121,6 +121,7 @@ public class Scout extends RobotPlayer {
         Team enemy = rc.getTeam().opponent();
         Team ally  = rc.getTeam();
         RobotInfo[] enemies;
+        BulletInfo[] bullets;
         dir = randomDirection();
         while (true) {
 
@@ -142,6 +143,7 @@ public class Scout extends RobotPlayer {
         			//tryMove(rc.getLocation().directionTo(shakeable));
        			 	//rc.shake(shakeable);
             	enemies = rc.senseNearbyRobots(rc.getType().sensorRadius, enemy);
+            	bullets = rc.senseNearbyBullets(rc.getType().bulletSightRadius);
         		if(ID < 500 && !dying) {
                     ID = Broadcast.requestID(ID);
                 }
@@ -171,15 +173,15 @@ public class Scout extends RobotPlayer {
 	            				&& rc.senseNearbyBullets(rc.getType().bulletSightRadius).length < 5 ) {
 	            			dir = (rc.getLocation().directionTo(enemies[0].getLocation()));
 	        		} */
-	        		if(dying || rc.senseNearbyBullets(rc.getType().bulletSightRadius).length > 5) {
+	        		if(dying || bullets.length > 5) {
 	    				flee = true;
-    					tryMove(rc.getLocation().directionTo(enemies[0].getLocation()).opposite());
+    					tryMove(rc.getLocation().directionTo(bullets[0].getLocation()).opposite());
 	    			}
 	        		
             		if(rc.canFireSingleShot() && !rc.hasAttacked() && rc.getLocation().distanceTo(enemies[0].getLocation()) < 4) {
         				rc.fireSingleShot(rc.getLocation().directionTo(enemies[0].getLocation()));
         			}
-                } else if(rc.senseNearbyBullets(rc.getType().bulletSightRadius).length < 5) {
+                } else if(bullets.length < 5) {
                 	flee = false;
                 	dir = randomDirection();
                 }
