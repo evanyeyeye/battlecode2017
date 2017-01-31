@@ -149,10 +149,14 @@ public class Gardener extends RobotPlayer {
     	prevLocation = rc.getLocation();
     	if (tryMove(targetLocation, 2, 45) 
     			|| (!rc.canMove(targetLocation) && rc.getLocation().distanceTo(targetLocation) < rc.getType().bodyRadius) 
-    			|| !rc.onTheMap(rc.getLocation().add(rc.getLocation().directionTo(targetLocation)))) {
+    			|| !rc.onTheMap(rc.getLocation().add(rc.getLocation().directionTo(targetLocation)))
+    			|| stepsCount >= 20) {
+    		stepsCount = 0;
     		targetLocation = null;
     	}
-        
+    	
+    	stepsCount += 1;
+
     	return testHome();
     }
     
@@ -244,7 +248,9 @@ public class Gardener extends RobotPlayer {
     
     public static MapLocation targetLocation = null;
     public static MapLocation startLocation = null;
+    
     public static MapLocation prevLocation = null; // useless as of now, never got chance to implement 
+    public static int stepsCount = 0;
     
     public static boolean foundHome = false;
     

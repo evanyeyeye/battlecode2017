@@ -86,12 +86,6 @@ public strictfp class RobotPlayer {
         return false;
     }
     
-    
-    
-    
-    
-    
-    
     /*
      * @return a random Direction
      */
