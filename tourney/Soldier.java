@@ -66,6 +66,7 @@ public class Soldier extends RobotPlayer {
                     MapLocation loc = neutralTrees[i].getLocation();
                     if (neutralTrees[i].getContainedBullets() > 0 && rc.canShake(neutralTrees[i].getLocation())) {
                         rc.shake(loc); // Collect free bullets from neutral trees
+                        Broadcast.requestLumberjack(neutralTrees[i]);
                     }
                 }
                 

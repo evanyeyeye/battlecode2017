@@ -108,8 +108,10 @@ public class Scout extends RobotPlayer {
 	
 	static boolean dying = false;
 	static boolean init = true;
+	static boolean flee = true;
 	//public static double range = 50.0;
-	static Direction dir = Direction.EAST;
+	static Direction dir = Direction.WEST;
+	static MapLocation start;
 	static int ID = 0;
     public static void run(RobotController rc) {
     	
@@ -122,6 +124,7 @@ public class Scout extends RobotPlayer {
         while (true) {
 
             try {
+            	if(start == null) start = rc.getLocation();
             	/*double minMapSize[] = new double[2];
             	if(init) {
             		minMapSize = skirtEdge();
@@ -129,66 +132,75 @@ public class Scout extends RobotPlayer {
             	}*/
             	//should detect bullets and find where to move to instead; implement in dodge()
             	//double temp = range * 2;
-            	dir = randomDirection();
             	//while(range > 0.0) {
         		//MapLocation attackable = findEnemy();
-        		enemies = rc.senseNearbyRobots(rc.getType().sensorRadius, enemy);
         		
         		//RobotInfo[] friendlies = rc.senseNearbyRobots(rc.getType().sensorRadius, ally);
         		//MapLocation shakeable = findTree();
         		//if(shakeable != null) {
         			//tryMove(rc.getLocation().directionTo(shakeable));
        			 	//rc.shake(shakeable);
-        		/*if(ID < 500 && !dying) {
+            	enemies = rc.senseNearbyRobots(rc.getType().sensorRadius, enemy);
+        		if(ID < 500 && !dying) {
                     ID = Broadcast.requestID(ID);
-                }*/
+                }
         		
-        		/*if (rc.getHealth() < rc.getType().maxHealth / 10 && !dying) {
+        		if (rc.getHealth() < rc.getType().maxHealth / 10 && !dying) {
                     Broadcast.decrementRobotCount(RobotType.SCOUT); // Broadcast death on low health
                     Broadcast.dying(ID);
                     ID = -ID; // render ID unusable
                     dying = true;
-                }*/
+                }
         		
-        		TreeInfo[] neutralTrees = rc.senseNearbyTrees(rc.getType().bodyRadius + rc.getType().strideRadius, Team.NEUTRAL);
+        		TreeInfo[] neutralTrees = rc.senseNearbyTrees(rc.getType().sensorRadius, Team.NEUTRAL);
                 for (int i=0; i < neutralTrees.length; i++) {
                     MapLocation loc = neutralTrees[i].getLocation();
                     if (neutralTrees[i].getContainedBullets() > 0 && rc.canShake(neutralTrees[i].getLocation())) {
                         rc.shake(loc); // Collect free bullets from neutral trees
                         dir = (rc.getLocation().directionTo(loc));
+                        Broadcast.requestLumberjack(neutralTrees[i]);
                     }
                 }
                 
-                System.out.println("SCOUT: " + Clock.getBytecodesLeft());
+                //System.out.println("SCOUT: " + Clock.getBytecodesLeft());
             	//for(int i = 0; i < enemies.length; i++) {
                 if(enemies.length > 0) {
 	            	if((enemies[0].getType() == RobotType.ARCHON 
 	            				|| enemies[0].getType() == RobotType.GARDENER) 
 	            				&& rc.senseNearbyBullets(rc.getType().bulletSightRadius).length < 5 ) {
-	            			tryMove(rc.getLocation().directionTo(enemies[0].getLocation()));
+	            			dir = (rc.getLocation().directionTo(enemies[0].getLocation()));
 	        		} 
 	        		if(dying || rc.senseNearbyBullets(rc.getType().bulletSightRadius).length > 5) {
-	    				tryMove(rc.getLocation().directionTo(enemies[0].getLocation()).opposite());
+	    				if(flee) {
+	    					tryMove(rc.getLocation().directionTo(enemies[0].getLocation()).opposite());
+	    					
+	    				} else {
+	    					dir = (rc.getLocation().directionTo(enemies[0].getLocation()).opposite());
+	    				}
 	    			}
 	        		
             		if(rc.canFireSingleShot() && !rc.hasAttacked() && rc.getLocation().distanceTo(enemies[0].getLocation()) < 4) {
         				rc.fireSingleShot(rc.getLocation().directionTo(enemies[0].getLocation()));
         			}
+                } else if(rc.senseNearbyBullets(rc.getType().bulletSightRadius).length < 5) {
+                	flee = false;
+                	dir = randomDirection();
                 }
             	//}
                 
         		//if(!rc.hasMoved()) {
-        			if(!rc.onTheMap(rc.getLocation())) {
-	        			tryMove(dir.rotateLeftDegrees((float) 90.0));
-	        		} else {
-	        			if(enemies.length > 0 && dir.degreesBetween(rc.getLocation().directionTo(enemies[0].getLocation())) < 10) {
-	        				tryMove(rc.getLocation().directionTo(enemies[0].getLocation()).opposite());
-	        			} else {
-	        				tryMove(dir);
-	        			}
+    			while(!rc.onTheMap(rc.getLocation().add(dir, rc.getType().strideRadius))) {
+        			dir = dir.rotateLeftDegrees((float) 90.0);
+        		}
+        			
+    			if(enemies.length > 0 && dir.degreesBetween(rc.getLocation().directionTo(enemies[0].getLocation())) < 10) {
+    				dir = rc.getLocation().directionTo(enemies[0].getLocation()).opposite();
+    			}
+        		if(!rc.hasMoved()) {
+        			tryMove(dir);
+        		}
+	        		
 	        			//range -= RobotType.SCOUT.strideRadius;
-	        		}
-        		//}
         		Clock.yield();
             	//}
             	//range = temp;

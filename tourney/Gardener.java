@@ -149,10 +149,10 @@ public class Gardener extends RobotPlayer {
                                 break;
 
                     
-                        if ((rc.senseNearbyBullets(rc.getType().bulletSightRadius).length < 5)
-                            && Broadcast.getRobotCount(RobotType.SCOUT) < 2 && 
-                            (Broadcast.getRobotCount(RobotType.SOLDIER) > 1 || Broadcast.getRobotCount(RobotType.LUMBERJACK) > 1))
-                        for (int i=0; i<buildSequence.length; i++)
+                    if ((rc.senseNearbyBullets(rc.getType().bulletSightRadius).length < 5)
+                        && Broadcast.getRobotCount(RobotType.SCOUT) < 1 && 
+                        (Broadcast.getRobotCount(RobotType.SOLDIER) > 1 || Broadcast.getRobotCount(RobotType.LUMBERJACK) > 1))
+                    	for (int i=0; i<buildSequence.length; i++)
                             if (buildRobot(RobotType.SCOUT, buildSequence[i]))
                                 break;
                     
