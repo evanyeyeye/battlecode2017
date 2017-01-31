@@ -24,7 +24,7 @@ public class Lumberjack extends RobotPlayer {
             if (treeID > 0) {
                 MapLocation ml = new MapLocation(Float.intBitsToFloat(rc.readBroadcast(i+1)),
                         Float.intBitsToFloat(rc.readBroadcast(i+2)));
-                float dist = rc.getLocation().distanceTo(ml) - Float.intBitsToFloat(rc.readBroadcast(i+3)) - rc.getType().bodyRadius - DISTANCE_OFFSET; 
+                float dist = rc.getLocation().distanceTo(ml) - Float.intBitsToFloat(rc.readBroadcast(i+3)) - rc.getType().bodyRadius - CALC_OFFSET; 
                 if (closestLocation == null || closestDistance > dist) {
                     closestLocation = ml;
                     closestDistance = dist;
@@ -62,7 +62,7 @@ public class Lumberjack extends RobotPlayer {
             if (trees[i].getTeam() == rc.getTeam())
                 continue;
     		Direction dirToTree = rc.getLocation().directionTo(trees[i].getLocation());
-    		float distToTree = rc.getLocation().distanceTo(trees[i].getLocation()) - trees[i].getRadius() - rc.getType().bodyRadius - DISTANCE_OFFSET;
+    		float distToTree = rc.getLocation().distanceTo(trees[i].getLocation()) - trees[i].getRadius() - rc.getType().bodyRadius - CALC_OFFSET;
         	
     		// System.out.println(trees[i].getID() + ": " + distToTree);
     		
@@ -93,8 +93,6 @@ public class Lumberjack extends RobotPlayer {
                     ID = -ID; // render ID unusable
                     dying = true; // code will not enter this if statement again
                 }
-
-                MapLocation myLocation = rc.getLocation();
 
                 TreeInfo[] neutralTrees = rc.senseNearbyTrees(rc.getType().bodyRadius + rc.getType().strideRadius, Team.NEUTRAL);
                 for (int i=0; i<neutralTrees.length; i++)

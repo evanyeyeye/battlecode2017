@@ -102,41 +102,6 @@ public strictfp class RobotPlayer {
 
         return false;
     }
-    
-    public static boolean tryMove(MapLocation ml, float degreeOffset, int checksPerSide) throws GameActionException {
-
-        if (rc.hasMoved())
-            return false;
-        
-		Direction dir = rc.getLocation().directionTo(ml);
-    	float dist = rc.getLocation().distanceTo(ml);
-    	
-    	boolean temp = false;
-        if (dist > rc.getType().strideRadius) 
-        	dist = rc.getType().strideRadius;
-        else
-        	temp = true;
-        if (rc.canMove(dir, dist)) { 
-            rc.move(dir, dist);
-            return temp;
-    	}
-        
-        int currentCheck = 1;
-
-        while (currentCheck <= checksPerSide) {
-            if(rc.canMove(dir.rotateLeftDegrees(degreeOffset*currentCheck))) {
-                rc.move(dir.rotateLeftDegrees(degreeOffset*currentCheck));
-                return false;
-            }
-            if(rc.canMove(dir.rotateRightDegrees(degreeOffset*currentCheck))) {
-                rc.move(dir.rotateRightDegrees(degreeOffset*currentCheck));
-                return false;
-            }
-            currentCheck++;
-        }
-
-        return false;
-    }
 
     /**
      * A slightly more complicated example function, this returns true if the given bullet is on a collision
