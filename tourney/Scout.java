@@ -23,6 +23,7 @@ public class Scout extends RobotPlayer {
             try {
             	
             	if (rc.getHealth() < rc.getType().maxHealth / 10 && !dying) {
+
                     Broadcast.decrementRobotCount(RobotType.SCOUT); // Broadcast death on low health
                     Broadcast.dying(ID);
                     ID = -ID; // render ID unusable
